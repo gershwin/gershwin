@@ -54,6 +54,8 @@ static Symbol WITH_META = Symbol.intern("clojure.core", "with-meta");
 static Symbol META = Symbol.intern("clojure.core", "meta");
 static Symbol DEREF = Symbol.intern("clojure.core", "deref");
 static Keyword UNKNOWN = Keyword.intern(null, "unknown");
+    static Keyword WORD = Keyword.intern("gershwin.core", "word");
+    static Keyword QUOTATION = Keyword.intern("gershwin.core", "quotation");
 //static Symbol DEREF_BANG = Symbol.intern("clojure.core", "deref!");
 
 static IFn[] macros = new IFn[256];
@@ -84,11 +86,13 @@ static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
+        macros['|'] = new CommentReader();
 	macros['\''] = new WrappingReader(QUOTE);
 	macros['@'] = new WrappingReader(DEREF);//new DerefReader();
 	macros['^'] = new MetaReader();
 	macros['`'] = new SyntaxQuoteReader();
 	macros['~'] = new UnquoteReader();
+        macros['«'] = new QuotationReader();
 	macros['('] = new ListReader();
 	macros[')'] = new UnmatchedDelimiterReader();
 	macros['['] = new VectorReader();
@@ -178,6 +182,16 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 					return null;
 				return n;
 				}
+
+                        if(ch == ':') {
+                            int ch2 = read1(r);
+                            unread(r, ch2);
+                            if(isWhitespace(ch2)) {
+                                // Word definition
+                                return new ColonReader().invoke(r, (char) ch);
+                            }
+                        }
+
 
 			IFn macroFn = getMacro(ch);
 			if(macroFn != null)
@@ -418,6 +432,55 @@ static private boolean isMacro(int ch){
 static private boolean isTerminatingMacro(int ch){
 	return (ch != '#' && ch != '\'' && ch != '%' && isMacro(ch));
 }
+
+    public static class ColonReader extends AFn {
+	public Object invoke(Object reader, Object colon) {
+            PushbackReader r = (PushbackReader) reader;
+            int line = -1;
+            int column = -1;
+            if(r instanceof LineNumberingPushbackReader)
+                {
+                    line = ((LineNumberingPushbackReader) r).getLineNumber();
+                    column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
+                }
+            List list = readDelimitedList(';', r, true);
+            if(list.isEmpty())
+                return PersistentList.EMPTY;
+            IObj s = (IObj) RT.cons(WORD, PersistentList.create(list));
+            //		IObj s = (IObj) RT.seq(list);
+            if(line != -1)
+                {
+                    return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
+                }
+            else
+                return s;
+	}
+    }
+
+    public static class QuotationReader extends AFn {
+	public Object invoke(Object reader, Object angleBracket) {
+            PushbackReader r = (PushbackReader) reader;
+            int line = -1;
+            int column = -1;
+            if(r instanceof LineNumberingPushbackReader)
+                {
+                    line = ((LineNumberingPushbackReader) r).getLineNumber();
+                    column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
+                }
+            List list = readDelimitedList('»', r, true);
+            if(list.isEmpty())
+                return PersistentList.EMPTY;
+            IObj s = (IObj) RT.cons(QUOTATION, PersistentList.create(list));
+            //		IObj s = (IObj) RT.seq(list);
+            if(line != -1)
+                {
+                    return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
+                }
+            else
+                return s;
+	}
+    }
+
 
 public static class RegexReader extends AFn{
 	static StringReader stringrdr = new StringReader();
@@ -1280,4 +1343,3 @@ public static void main(String[] args){
  */
 
 }
-

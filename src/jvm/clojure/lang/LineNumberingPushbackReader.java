@@ -30,11 +30,11 @@ private boolean _prev;
 private int _columnNumber = 1;
 
 public LineNumberingPushbackReader(Reader r){
-	super(new LineNumberReader(r));
+    super(new LineNumberReader(r), 2);
 }
 
 public LineNumberingPushbackReader(Reader r, int size){
-	super(new LineNumberReader(r, size));
+    super(new LineNumberReader(r, size), size);
 }
 
 public int getLineNumber(){
