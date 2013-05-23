@@ -470,8 +470,10 @@ static private boolean isTerminatingMacro(int ch){
             List list = readDelimitedList('»', r, true);
             if(list.isEmpty())
                 return PersistentList.EMPTY;
-            IObj s = (IObj) RT.cons(QUOTATION, PersistentList.create(list));
+            // IObj s = (IObj) RT.cons(QUOTATION, PersistentList.create(list));
             //		IObj s = (IObj) RT.seq(list);
+            IObj s = (IObj) RT.cons(Compiler.FN,
+                                    RT.cons(PersistentVector.EMPTY, RT.seq(list)));
             if(line != -1)
                 {
                     return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
