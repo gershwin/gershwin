@@ -201,6 +201,7 @@ static Keyword COLUMN_KEY = Keyword.intern(null, "column");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 static Keyword DECLARED_KEY = Keyword.intern(null, "declared");
 static Keyword DOC_KEY = Keyword.intern(null, "doc");
+static Keyword STACK_VOID = Keyword.intern("gershwin.core", "stack-void");
 final static public Var USE_CONTEXT_CLASSLOADER =
 		Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), T).setDynamic();
 //boolean
@@ -260,7 +261,7 @@ public static List<String> processCommandLine(String[] args){
 	return arglist;
 }
 
-// duck typing stderr plays nice with e.g. swank 
+// duck typing stderr plays nice with e.g. swank
 public static PrintWriter errPrintWriter(){
     Writer w = (Writer) ERR.deref();
     if (w instanceof PrintWriter) {
@@ -1215,7 +1216,7 @@ static public float floatCast(long x){
 static public float floatCast(double x){
 	if(x < -Float.MAX_VALUE || x > Float.MAX_VALUE)
 		throw new IllegalArgumentException("Value out of range for float: " + x);
-	
+
 	return (float) x;
 }
 
