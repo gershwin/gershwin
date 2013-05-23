@@ -444,10 +444,12 @@ static private boolean isTerminatingMacro(int ch){
                     column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
                 }
             List list = readDelimitedList(';', r, true);
-            if(list.isEmpty())
-                return PersistentList.EMPTY;
-            IObj s = (IObj) RT.cons(WORD, PersistentList.create(list));
-            //		IObj s = (IObj) RT.seq(list);
+            if (list.size() < 3) {
+                throw Util.runtimeException("Too few arguments to ':'. At a minimum, you must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
+            } else if(!(list.get(0) instanceof Symbol)) {
+                throw Util.runtimeException("First argument to ':' must be a Symbol");
+            }
+            IObj s = (IObj) ColonDefinition.create(RT.seq(list));
             if(line != -1)
                 {
                     return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
@@ -468,12 +470,10 @@ static private boolean isTerminatingMacro(int ch){
                     column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
                 }
             List list = readDelimitedList('»', r, true);
+            // TODO Maybe this should be handled in the compiler.
             if(list.isEmpty())
-                return PersistentList.EMPTY;
-            // IObj s = (IObj) RT.cons(QUOTATION, PersistentList.create(list));
-            //		IObj s = (IObj) RT.seq(list);
-            IObj s = (IObj) RT.cons(Compiler.FN,
-                                    RT.cons(PersistentVector.EMPTY, RT.seq(list)));
+                return RT.cons(Compiler.FN, RT.cons(PersistentVector.EMPTY, RT.list(RT.STACK_VOID)));
+            IObj s = (IObj) QuotationDefinition.create(RT.seq(list));
             if(line != -1)
                 {
                     return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
