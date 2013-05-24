@@ -54,8 +54,7 @@ static Symbol WITH_META = Symbol.intern("clojure.core", "with-meta");
 static Symbol META = Symbol.intern("clojure.core", "meta");
 static Symbol DEREF = Symbol.intern("clojure.core", "deref");
 static Keyword UNKNOWN = Keyword.intern(null, "unknown");
-    static Keyword WORD = Keyword.intern("gershwin.core", "word");
-    static Keyword QUOTATION = Keyword.intern("gershwin.core", "quotation");
+
 //static Symbol DEREF_BANG = Symbol.intern("clojure.core", "deref!");
 
 static IFn[] macros = new IFn[256];
@@ -449,7 +448,7 @@ static private boolean isTerminatingMacro(int ch){
             } else if(!(list.get(0) instanceof Symbol)) {
                 throw Util.runtimeException("First argument to ':' must be a Symbol");
             }
-            IObj s = (IObj) ColonDefinition.create(RT.seq(list));
+            IObj s = (IObj) RT.cons(Compiler.DEFWORD, PersistentList.create(list));
             if(line != -1)
                 {
                     return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
@@ -473,7 +472,7 @@ static private boolean isTerminatingMacro(int ch){
             // TODO Maybe this should be handled in the compiler.
             if(list.isEmpty())
                 return RT.cons(Compiler.FN, RT.cons(PersistentVector.EMPTY, RT.list(RT.STACK_VOID)));
-            IObj s = (IObj) QuotationDefinition.create(RT.seq(list));
+            IObj s = (IObj) PersistentList.create(list);
             if(line != -1)
                 {
                     return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));

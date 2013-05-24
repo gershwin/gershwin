@@ -33,6 +33,7 @@ public class RT{
 static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.intern(null, "t"));
 static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.intern(null, "t"));
 static final public String LOADER_SUFFIX = "__init";
+static final public String GERSHWIN_SUFFIX = "__GWN__";
 
 //simple-symbol->class
 final static IPersistentMap DEFAULT_IMPORTS = map(
