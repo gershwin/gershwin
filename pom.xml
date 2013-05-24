@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.clojure</groupId>
-  <artifactId>clojure</artifactId>
-  <name>clojure</name>
+  <groupId>com.semperos</groupId>
+  <artifactId>gershwin</artifactId>
+  <name>gershwin</name>
   <packaging>jar</packaging>
-  <version>1.6.0-master-SNAPSHOT</version>
+  <version>0.2.0-master-SNAPSHOT</version>
 
-  <url>http://clojure.org/</url>
-  <description>Clojure core environment and runtime library.</description>
+  <!-- <url>http://clojure.org/</url> -->
+  <description>Gershwin: Stack-based, Concatenative Clojure</description>
 
   <developers>
     <developer>
       <name>Rich Hickey</name>
       <email>richhickey@gmail.com</email>
+      <timezone>-5</timezone>
+    </developer>
+    <developer>
+      <name>Daniel Gregoire</name>
+      <email>daniel.l.gregoire@gmail.com</email>
       <timezone>-5</timezone>
     </developer>
   </developers>
