@@ -8615,7 +8615,11 @@ public static class CaseExpr implements Expr, MaybePrimitiveExpr{
 static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;}
 
     private static ISeq withStackVoid(Object rawForm) {
-        return clojure.lang.RT.list(DO, rawForm, RT.STACK_VOID);
+        return RT.list(DO, rawForm, RT.STACK_VOID);
+    }
+
+    private static ISeq withNil(Object rawForm) {
+        return RT.list(DO, rawForm, null);
     }
 
     /**
@@ -8626,10 +8630,10 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
      * to the stack.
      */
     private static ISeq withConjIt(Object rawForm) {
-        return withStackVoid(RT.cons(DOT,
-                                     RT.cons(Symbol.intern("clojure.lang.GershwinStack"),
-                                             RT.cons(RT.list(Symbol.intern("conjIt"), rawForm),
-                                                     null))));
+        return withNil(RT.cons(DOT,
+                               RT.cons(Symbol.intern("clojure.lang.GershwinStack"),
+                                       RT.cons(RT.list(Symbol.intern("conjIt"), rawForm),
+                                               null))));
     }
 
     private static ISeq withInvoke(Object rawForm) {
