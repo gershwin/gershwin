@@ -37,8 +37,8 @@ import org.objectweb.asm.util.CheckClassAdapter;
 public class Compiler implements Opcodes{
 
 static final Symbol DEF = Symbol.intern("def");
-    // static final Symbol DEFWORD = Symbol.intern("gershwin.core", "defword");
     static final Symbol DEFWORD = Symbol.intern("defword");
+    static final Symbol QUOTATION = Symbol.intern("quotation");
 static final Symbol LOOP = Symbol.intern("loop*");
 static final Symbol RECUR = Symbol.intern("recur");
 static final Symbol IF = Symbol.intern("if");
@@ -106,6 +106,7 @@ static final Symbol IN_NS = Symbol.intern("in-ns");
 static final public IPersistentMap specials = PersistentHashMap.create(
 		DEF, new DefExpr.Parser(),
                 DEFWORD, new DefWordExpr.Parser(),
+                QUOTATION, null,
 		LOOP, new LetExpr.Parser(),
 		RECUR, new RecurExpr.Parser(),
 		IF, new IfExpr.Parser(),
@@ -540,6 +541,11 @@ static class DefExpr implements Expr{
 		}
 	}
 }
+
+    /**
+     * This {@link Expr} defers to {@link DefExpr}, done in the
+     * Parser.parse() method.
+     */
     public static class DefWordExpr implements Expr{
 	public Object eval() {
             return null;
@@ -581,58 +587,16 @@ static class DefExpr implements Expr{
                 // System.out.println("WORD META: " + meta);
                 Symbol sym = (Symbol) gershwinSym.withMeta(meta);
                 // System.out.println("FINAL SYMBOL: " + sym);
-                IParser defParser = new DefExpr.Parser();
-                // System.out.println("DEF PARSER: " + defParser.getClass().getName());
                 // System.out.println("WORD DEF:" + sym + ", " + form);
-                IPersistentCollection wrappedForms = null;
-                for(ISeq s = RT.next(form); s != null; s = s.next()) {
-                    Object o = s.first();
-                    boolean handled = false;
-                    // FIXME !! Wrap with withInvoke
-                    if(o instanceof Var) {
-                        Var aVar = (Var) o;
-                        IPersistentMap varMeta = aVar.meta();
-                        if(varMeta != null && varMeta.containsKey(wordKey)) {
-                            // This is a Gershwin word, it's definition is already wrapped.
-                            if(RT.booleanCast(varMeta.valAt(wordKey))) {
-                                // System.out.println("Direct Gershwin Word var");
-                                wrappedForms = RT.conj(wrappedForms, withInvoke(o));
-                                handled = true;
-                            }
-                        }/** else {
-                            // Name mangle to see if this is a Gershwin word
-
-                            }*/
-                    } else if(o instanceof Symbol) {
-                        // System.out.println("MUNGE WORD SYMBOL");
-                        Symbol aSym = (Symbol) o;
-                        Symbol maybeVarSym = Symbol.intern(aSym.toString() + RT.GERSHWIN_SUFFIX);
-                        // System.out.println("Maybe it's this Gershwin word.... ? " + maybeVarSym);
-                        Object maybeVar = maybeResolveIn((Namespace) RT.CURRENT_NS.deref(), maybeVarSym);
-                        if(maybeVar != null && maybeVar instanceof Var) {
-                            Var bVar = (Var) maybeVar;
-                            if(bVar.isBound()) {
-                                IPersistentMap bVarMeta = bVar.meta();
-                                if(bVarMeta != null && bVarMeta.containsKey(wordKey)) {
-                                    // This is a Gershwin word, it's definition is already wrapped.
-                                    if(RT.booleanCast(bVarMeta.valAt(wordKey))) {
-                                        // System.out.println("Name-munged Gershwin Word var: " + bVar);
-                                        wrappedForms = RT.conj(wrappedForms, withInvoke(bVar));
-                                        handled = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // Put it on the stack by default.
-                    if(!handled)
-                        wrappedForms = RT.conj(wrappedForms, withConjIt(o));
-                }
+                // First form is stack effect.
+                IPersistentCollection wrappedForms = wrapGershwinForms(RT.next(form));
                 // System.out.println("WRAPPED FORMS: " + wrappedForms);
                 // Note this is fn*
                 ISeq fnForm = RT.cons(FN,
                                       RT.cons(PersistentVector.EMPTY, wrappedForms));
                 // System.out.println("FN FORM: " + fnForm);
+                IParser defParser = new DefExpr.Parser();
+                // System.out.println("DEF PARSER: " + defParser.getClass().getName());
                 return defParser.parse(context,
                                        RT.cons(DEF,
                                                RT.cons(sym, RT.list(fnForm))));
@@ -662,7 +626,83 @@ static class DefExpr implements Expr{
             return Var.class;
         }
     }
-    // public static class QuotationExpr implements Expr{}
+
+    public static class QuotationExpr implements Expr{
+
+	public boolean hasJavaClass() {
+		return true;
+	}
+
+	public Class getJavaClass() {
+		return AFunction.class;
+	}
+
+	public Object eval() {
+            return null;
+        }
+
+        public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {}
+
+        static Expr parse(C context, ISeq form, String name) {
+            // System.out.println("COMPILER, Parse Quotation: " + form);
+            // First item is QUOTATION op.
+            IPersistentCollection wrappedForms = wrapGershwinForms(RT.next(form));
+            // System.out.println("WRAPPED Quotation FORMS: " + wrappedForms);
+            // Note this is fn*
+            ISeq fnForm = RT.cons(FN,
+                                  RT.cons(PersistentVector.EMPTY, wrappedForms));
+            // System.out.println("FN Quotation FORM: " + fnForm);
+            return FnExpr.parse(context, fnForm, name);
+        }
+    }
+
+
+    private static IPersistentCollection wrapGershwinForms(Object form) {
+        // Vector because we care what end gets conj'ed.
+        IPersistentCollection wrappedForms = PersistentVector.EMPTY;
+        for(ISeq s = (ISeq) form; s != null; s = s.next()) {
+            Object o = s.first();
+            boolean handled = false;
+            // TODO Consider necessity and whether or not name munged var
+            //   needs support as well.
+            if(o instanceof Var) {
+                Var aVar = (Var) o;
+                IPersistentMap varMeta = aVar.meta();
+                if(varMeta != null && varMeta.containsKey(wordKey)) {
+                    // This is a Gershwin word, it's definition is already wrapped.
+                    if(RT.booleanCast(varMeta.valAt(wordKey))) {
+                        // System.out.println("Direct Gershwin Word var");
+                        wrappedForms = RT.conj(wrappedForms, withInvoke(o));
+                        handled = true;
+                    }
+                }
+            } else if(o instanceof Symbol) {
+                // System.out.println("MUNGE WORD SYMBOL");
+                Symbol aSym = (Symbol) o;
+                Symbol maybeVarSym = Symbol.intern(aSym.toString() + RT.GERSHWIN_SUFFIX);
+                // System.out.println("Maybe it's this Gershwin word.... ? " + maybeVarSym);
+                Object maybeVar = maybeResolveIn((Namespace) RT.CURRENT_NS.deref(), maybeVarSym);
+                if(maybeVar != null && maybeVar instanceof Var) {
+                    Var bVar = (Var) maybeVar;
+                    if(bVar.isBound()) {
+                        IPersistentMap bVarMeta = bVar.meta();
+                        if(bVarMeta != null && bVarMeta.containsKey(wordKey)) {
+                            // This is a Gershwin word, it's definition is already wrapped.
+                            if(RT.booleanCast(bVarMeta.valAt(wordKey))) {
+                                // System.out.println("Name-munged Gershwin Word var: " + bVar);
+                                wrappedForms = RT.conj(wrappedForms, withInvoke(bVar));
+                                handled = true;
+                            }
+                        }
+                    }
+                }
+            }
+            // Put it on the stack by default.
+            if(!handled)
+                wrappedForms = RT.conj(wrappedForms, withConjIt(o));
+        }
+        return wrappedForms;
+    }
 
 public static class AssignExpr implements Expr{
 	public final AssignableExpr target;
@@ -6688,6 +6728,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		IParser p;
 		if(op.equals(FN))
 			return FnExpr.parse(context, form, name);
+                else if(op.equals(QUOTATION))
+                    return QuotationExpr.parse(context, form, name);
 		else if((p = (IParser) specials.valAt(op)) != null) {
                     // System.out.println("SPECIALS: " + op);
 			return p.parse(context, form);
