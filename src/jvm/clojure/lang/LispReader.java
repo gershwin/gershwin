@@ -469,10 +469,7 @@ static private boolean isTerminatingMacro(int ch){
                     column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
                 }
             List list = readDelimitedList('»', r, true);
-            // TODO Maybe this should be handled in the compiler.
-            if(list.isEmpty())
-                return RT.cons(Compiler.FN, RT.cons(PersistentVector.EMPTY, RT.list(RT.STACK_VOID)));
-            IObj s = (IObj) PersistentList.create(list);
+            IObj s = (IObj) RT.cons(Compiler.QUOTATION, PersistentList.create(list));
             if(line != -1)
                 {
                     return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
