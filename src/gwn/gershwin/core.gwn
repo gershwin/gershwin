@@ -1,0 +1,85 @@
+(ns gershwin.core
+  (:import [clojure.lang GershwinStack GershwinStack$StackUnderflowException]))
+
+|| Stack Manipulation ||
+
+(defn stack-clear
+  "Clear the stack"
+  []
+  (GershwinStack/clear))
+
+(defn st-peek [] (GershwinStack/peek))
+
+(defn peek* [coll]
+  "Like Clojure's peek, but throws an exception if the stack is empty."
+  (if (zero? (count coll))
+    (throw (GershwinStack$StackUnderflowException. "Data stack underflow. Can't take something off an empty data stack."))
+    (peek coll)))
+
+(defn st-pop
+  "Call GershwinStack's pop method. Immutable."
+  []
+  (GershwinStack/pop))
+
+(defn pop-it
+  "Remove and return the item on TOS. Mutable."
+  []
+  (GershwinStack/popIt))
+
+(defn conj-it
+  "Conj the item onto the data stack. Mutable."
+  [x] (GershwinStack/conjMutable x))
+
+(defn ap
+  "Apply the function to n number of items off TOS. Defaults to top item."
+  ([a-fn] (ap 1 a-fn))
+  ([n a-fn] (apply a-fn (for [_ (range n)] (pop-it)))))
+
+(defn pop-n-swap
+  "Remove top two items from TOS, swap, then apply the function."
+  [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a)))
+
+(defn pop-n-swap2
+  "x y z --> z y x and pass it that way to a Clojure function."
+  [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
+
+|| Gershwin Version ||
+
+(let [properties (with-open [version-stream (.getResourceAsStream
+                                             (clojure.lang.RT/baseLoader)
+                                             "gershwin/version.properties")]
+                   (doto (new java.util.Properties)
+                     (.load version-stream)))
+      version-string (.getProperty properties "version")
+      [_ major minor incremental qualifier snapshot]
+      (re-matches
+       #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
+       version-string)
+      gershwin-version {:major       (Integer/valueOf ^String major)
+                        :minor       (Integer/valueOf ^String minor)
+                        :incremental (Integer/valueOf ^String incremental)
+                        :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+  (def ^{:dynamic true
+         :doc "The version info for Gershwin core, as a map containing :major :minor
+:incremental and :qualifier keys. Feature releases may increment
+:minor and/or :major, bugfix releases will increment :incremental.
+Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""}
+    *gershwin-version*
+    (if (.contains version-string "SNAPSHOT")
+      (clojure.lang.RT/assoc gershwin-version :interim true)
+      gershwin-version)))
+
+(defn
+  gershwin-version
+  "Returns Gershwin version as a printable string."
+  {:added "1.0"}
+  []
+  (str (:major *gershwin-version*)
+       "."
+       (:minor *gershwin-version*)
+       (when-let [i (:incremental *gershwin-version*)]
+         (str "." i))
+       (when-let [q (:qualifier *gershwin-version*)]
+         (when (pos? (count q)) (str "-" q)))
+       (when (:interim *gershwin-version*)
+         "-SNAPSHOT")))

@@ -34,6 +34,8 @@ static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.intern(null
 static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.intern(null, "t"));
 static final public String LOADER_SUFFIX = "__init";
 static final public String GERSHWIN_SUFFIX = "__GWN__";
+static final public String CLJ_FILE_EXT = ".clj";
+static final public String GWN_FILE_EXT = ".gwn";
 
 //simple-symbol->class
 final static IPersistentMap DEFAULT_IMPORTS = map(
@@ -415,14 +417,19 @@ static public void load(String scriptbase) throws IOException, ClassNotFoundExce
 
 static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException{
 	String classfile = scriptbase + LOADER_SUFFIX + ".class";
-	String cljfile = scriptbase + ".clj";
+	String gwnfile = scriptbase + GWN_FILE_EXT;
+        String cljfile = scriptbase + CLJ_FILE_EXT;
 	URL classURL = getResource(baseLoader(),classfile);
+        URL gwnURL = getResource(baseLoader(), gwnfile);
 	URL cljURL = getResource(baseLoader(), cljfile);
 	boolean loaded = false;
 
 	if((classURL != null &&
-	    (cljURL == null
-	     || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
+	    (gwnURL == null
+	     || lastModified(classURL, classfile) > lastModified(gwnURL, gwnfile)))
+           || (classURL != null &&
+               (cljURL == null
+                || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
 	   || classURL == null) {
 		try {
 			Var.pushThreadBindings(
@@ -435,14 +442,19 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 			Var.popThreadBindings();
 		}
 	}
-	if(!loaded && cljURL != null) {
+	if(!loaded && gwnURL != null) {
+		if(booleanCast(Compiler.COMPILE_FILES.deref()))
+			compile(gwnfile);
+		else
+			loadResourceScript(RT.class, gwnfile);
+	} else if(!loaded && cljURL != null) {
 		if(booleanCast(Compiler.COMPILE_FILES.deref()))
 			compile(cljfile);
 		else
 			loadResourceScript(RT.class, cljfile);
-	}
+        }
 	else if(!loaded && failIfNotFound)
-		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
+            throw new FileNotFoundException(String.format("Could not locate %s, %s, or %s on classpath: ", classfile, gwnfile, cljfile));
 }
 
 static void doInit() throws ClassNotFoundException, IOException{

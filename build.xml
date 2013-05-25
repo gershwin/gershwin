@@ -2,7 +2,7 @@
 
   <description>
     Build with "ant" and then start the
-    REPL with: "java -cp clojure.jar clojure.main".
+    REPL with: "java -cp gershwin.jar gershwin.main".
   </description>
 
   <property name="src" location="src"/>
@@ -10,6 +10,7 @@
   <property name="jsrc" location="${src}/jvm"/>
   <property name="jtestsrc" location="${test}/java"/>
   <property name="cljsrc" location="${src}/clj"/>
+  <property name="gwnsrc" location="${src}/gwn"/>
   <property name="cljscript" location="${src}/script"/>
   <property name="test-script" location="${cljscript}/run_tests.clj"/>
   <property name="compile-script" location="${cljscript}/bootstrap_compile.clj"/>
@@ -44,7 +45,7 @@
   <target name="compile-clojure"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
-          classpath="${maven.compile.classpath}:${build}:${cljsrc}"
+          classpath="${maven.compile.classpath}:${build}:${cljsrc}:${gwnsrc}"
           failonerror="true"
           fork="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>
@@ -75,17 +76,20 @@
       <arg value="clojure.string"/>
       <arg value="clojure.data"/>
       <arg value="clojure.reflect"/>
+      <!-- Gershwin -->
+      <arg value="gershwin.core"/>
+      <arg value="gershwin.main"/>
     </java>
   </target>
 
-  <target name="compile-tests" 
+  <target name="compile-tests"
           description="Compile the subset of tests that require compilation."
           unless="maven.test.skip">
     <mkdir dir="${test-classes}"/>
     <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
            debug="true" source="1.5" target="1.5" includeantruntime="no"/>
     <java classname="clojure.lang.Compile"
-          classpath="${test-classes}:${test}:${build}:${cljsrc}"
+          classpath="${test-classes}:${test}:${build}:${cljsrc}:${gwnsrc}"
           failonerror="true"
 	  fork="true">
       <sysproperty key="clojure.compile.path" value="${test-classes}"/>
@@ -101,13 +105,14 @@
           description="Run clojure tests without recompiling clojure."
           depends="compile-tests"
           unless="maven.test.skip">
-    <java classname="clojure.main" failonerror="true" fork="true">
+    <java classname="gershwin.main" failonerror="true" fork="true">
       <classpath>
         <pathelement path="${maven.test.classpath}"/>
         <path location="${test-classes}"/>
         <path location="${test}"/>
         <path location="${build}"/>
 	<path location="${cljsrc}"/>
+        <path location="${gwnsrc}"/>
       </classpath>
       <arg value="${test-script}"/>
     </java>
@@ -123,14 +128,17 @@
       <fileset dir="${cljsrc}">
         <include name="**/*.clj"/>
       </fileset>
+      <fileset dir="${gwnsrc}">
+        <include name="**/*.gwn"/>
+      </fileset>
       <manifest>
-        <attribute name="Main-Class" value="clojure.main"/>
+        <attribute name="Main-Class" value="gershwin.main"/>
         <attribute name="Class-Path" value="."/>
       </manifest>
     </jar>
     <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}"/>
   </target>
-  
+
   <target name="all" depends="build,test,jar"/>
 
   <target name="clean"
