@@ -14,6 +14,7 @@
        :author "Stephen C. Gilardi and Rich Hickey"}
   gershwin.main
   (:refer-clojure :exclude [with-bindings])
+  (:refer-gershwin)
   (:import (clojure.lang Compiler Compiler$CompilerException
                          LineNumberingPushbackReader RT))
   ;;(:use [clojure.repl :only (demunge root-cause stack-element-str)])
@@ -83,7 +84,6 @@
          " (" (.getFileName el) ":" (.getLineNumber el) ")")))
 ;;;;;;;;;;;;;;;;;;; end of redundantly copied from clojure.repl to avoid dep ;;;;;;;;;;;;;;
 
-
 (defmacro with-bindings
   "Executes body in the context of thread-local bindings for several vars
   that often need to be set!: *ns* *warn-on-reflection* *math-context*
@@ -96,6 +96,7 @@
              *print-meta* *print-meta*
              *print-length* *print-length*
              *print-level* *print-level*
+             *print-stack* *print-stack*
              *data-readers* *data-readers*
              *compile-path* (System/getProperty "clojure.compile.path" "classes")
              *command-line-args* *command-line-args*

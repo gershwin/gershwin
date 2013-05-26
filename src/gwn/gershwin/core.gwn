@@ -1,7 +1,7 @@
 (ns gershwin.core
   (:import [clojure.lang GershwinStack GershwinStack$StackUnderflowException]))
 
-|| Stack Manipulation ||
+;; Stack Manipulation ;;
 
 (defn stack-clear
   "Clear the stack"
@@ -43,7 +43,7 @@
   "x y z --> z y x and pass it that way to a Clojure function."
   [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
 
-|| Gershwin Version ||
+;; Gershwin Version ;;
 
 (let [properties (with-open [version-stream (.getResourceAsStream
                                              (clojure.lang.RT/baseLoader)
@@ -83,3 +83,9 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
          (when (pos? (count q)) (str "-" q)))
        (when (:interim *gershwin-version*)
          "-SNAPSHOT")))
+
+;; Printing ;;
+(def ^:dynamic
+  ^{:doc
+    "True while a verbose load is pending"}
+  *print-stack* true)

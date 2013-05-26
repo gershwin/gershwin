@@ -180,6 +180,7 @@ static Object readTrueFalseUnknown(String s){
 }
 
 static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.intern("clojure.core"));
+    static public final Namespace GERSHWIN_NS = Namespace.findOrCreate(Symbol.intern("gershwin.core"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.intern("user"));
 final static public Var OUT =
 		Var.intern(CLOJURE_NS, Symbol.intern("*out*"), new OutputStreamWriter(System.out)).setDynamic();
@@ -227,6 +228,7 @@ final static Var FLUSH_ON_NEWLINE = Var.intern(CLOJURE_NS, Symbol.intern("*flush
 final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), F).setDynamic();
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), T).setDynamic();
 final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), F).setDynamic();
+    final static Var PRINT_STACK = Var.intern(GERSHWIN_NS, Symbol.intern("*print-stack*"), T).setDynamic();
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), F).setDynamic();
 final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), F).setDynamic();
 
@@ -459,6 +461,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 
 static void doInit() throws ClassNotFoundException, IOException{
 	load("clojure/core");
+        load("gershwin/core");
 
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
@@ -467,11 +470,13 @@ static void doInit() throws ClassNotFoundException, IOException{
 	try {
 		Symbol USER = Symbol.intern("user");
 		Symbol CLOJURE = Symbol.intern("clojure.core");
+                Symbol GERSHWIN = Symbol.intern("gershwin.core");
 
 		Var in_ns = var("clojure.core", "in-ns");
 		Var refer = var("clojure.core", "refer");
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
+                refer.invoke(GERSHWIN);
 		maybeLoadResourceScript("user.clj");
 	}
 	finally {
