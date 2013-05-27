@@ -129,7 +129,28 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
     `'~gershwin-sym))
 
-: + [] (ap 2 +) ;
+
+;; Basic Math ;;
+
+: + [n n -- n] (ap 2 +) ;
+
+: - [n n -- n] (pop-n-swap -) ;
+
+: * [n n -- n] (ap 2 *) ;
+
+: < [n n -- ?] (pop-n-swap <) ;
+
+: > [n n -- ?] (pop-n-swap >) ;
+
+: <= [n n -- ?] (pop-n-swap <=) ;
+
+: >= [n n -- ?] (pop-n-swap >=) ;
+
+: div [n n -- n] (pop-n-swap /) ;
+
+: odd? [n -- ?] (ap odd?) ;
+
+: even? [n -- ?] (ap even?) ;
 
 (comment
   ;; When working at nREPL, pending better integration
