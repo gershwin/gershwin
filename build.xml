@@ -42,7 +42,7 @@
            debug="true" source="1.5" target="1.5"/>
   </target>
 
-  <target name="compile-clojure"
+  <target name="compile-gershwin"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
           classpath="${maven.compile.classpath}:${build}:${cljsrc}:${gwnsrc}"
@@ -120,7 +120,7 @@
 
   <target name="build"
           description="Build Clojure (compilation only, no tests)."
-          depends="compile-java, compile-clojure"/>
+          depends="compile-java, compile-gershwin"/>
 
   <target name="jar" depends="build"
           description="Create clojure jar file.">
