@@ -4,9 +4,18 @@
 ;; Stack Manipulation ;;
 
 (defn stack-clear
-  "Clear the stack"
+  "Clear the data stack."
   []
   (GershwinStack/clear))
+
+(defn stack-print
+  "Print the contents of the data stack as a seq."
+  []
+  (prn (clojure.lang.GershwinStack/seq)))
+
+(def clear-stack stack-clear)
+(def print-stack stack-print)
+(def ps stack-print)
 
 (defn st-peek [] (GershwinStack/peek))
 
@@ -103,3 +112,27 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   (if *gershwin-eval*
     (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForms form))))
     (. clojure.lang.Compiler (eval form))))
+
+(def ^{:private true
+       :doc "Shorter name for easier typing of `gershwin-eval` at REPL, specifically nREPL for which Gershwin integration has not yet been written."}
+  ge gershwin-eval)
+
+(defmacro gershwin-symbol
+  "Given a symbol, rename it based on Gershwin rename rules for word definitions."
+  [sym]
+  (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
+    `'~gershwin-sym))
+
+(defmacro ^:private gs
+  "Given a symbol, rename it based on Gershwin rename rules for word definitions."
+  [sym]
+  (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
+    `'~gershwin-sym))
+
+: + [] (ap 2 +) ;
+
+(comment
+  ;; When working at nREPL, pending better integration
+  (set! *gershwin-eval* true)
+  (set! *print-stack* true)
+  )
