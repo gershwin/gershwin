@@ -583,7 +583,7 @@ static class DefExpr implements Expr{
                 // word definition forms.
                 IPersistentCollection stackEffect = (IPersistentCollection) RT.first(form);
                 // System.out.println("STACK EFFECT: " + stackEffect);
-                meta = meta.assoc(stackEffectKey, stackEffect);
+                meta = meta.assoc(stackEffectKey, RT.list(QUOTE, stackEffect));
                 // System.out.println("WORD META: " + meta);
                 Symbol sym = (Symbol) gershwinSym.withMeta(meta);
                 // System.out.println("FINAL SYMBOL: " + sym);
