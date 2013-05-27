@@ -87,5 +87,19 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 ;; Printing ;;
 (def ^:dynamic
   ^{:doc
-    "True while a verbose load is pending"}
+    "Used at the REPL, if set to true the contents of the data stack will be printed after each read-eval-print loop."}
   *print-stack* true)
+
+;; Evaluation ;;
+(def ^:dynamic
+  ^{:doc
+    "When true, forms will be wrapped for Gershwin evaluation (data items will be pushed onto the stack, words and quotations will be invoked in place)."}
+  *gershwin-eval* true)
+
+(defn gershwin-eval
+  "Evaluates the form data structure (not text!) and either places it on the data stack or invokes it (if it is a word or quotation)."
+  {:added "0.2.0"}
+  [form]
+  (if *gershwin-eval*
+    (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForms form))))
+    (. clojure.lang.Compiler (eval form))))
