@@ -657,8 +657,10 @@ static class DefExpr implements Expr{
     }
 
 
-    private static IPersistentCollection wrapGershwinForms(Object form) {
+    public static IPersistentCollection wrapGershwinForms(Object form) {
         // Vector because we care what end gets conj'ed.
+        if(!(form instanceof ISeq))
+            form = new PersistentList(form);
         IPersistentCollection wrappedForms = PersistentVector.EMPTY;
         for(ISeq s = (ISeq) form; s != null; s = s.next()) {
             Object o = s.first();
