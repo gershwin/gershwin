@@ -214,6 +214,33 @@
 
   <profiles>
     <profile>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+      <id>quick-repl</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+            <executions>
+              <execution>
+                <id>run-repl</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>java</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <mainClass>gershwin.main</mainClass>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>repl</id>
       <build>
         <plugins>
@@ -229,7 +256,7 @@
               </execution>
             </executions>
             <configuration>
-              <mainClass>clojure.main</mainClass>
+              <mainClass>gershwin.main</mainClass>
             </configuration>
           </plugin>
         </plugins>
