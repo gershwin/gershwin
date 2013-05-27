@@ -97,6 +97,7 @@
              *print-length* *print-length*
              *print-level* *print-level*
              *print-stack* *print-stack*
+             *gershwin-eval* *gershwin-eval*
              *data-readers* *data-readers*
              *compile-path* (System/getProperty "clojure.compile.path" "classes")
              *command-line-args* *command-line-args*
@@ -108,10 +109,27 @@
              *e nil]
      ~@body))
 
+(def ^:private first-prompt (atom true))
 (defn repl-prompt
-  "Default :prompt hook for repl"
+  "Default :prompt hook for repl, modified for Gershwin."
   []
-  (printf "%s=> " (ns-name *ns*)))
+  (let [prompt (fn [] (printf "%s=> " (ns-name *ns*)))]
+    (when *print-stack*
+      (if @first-prompt
+        (do
+          (reset! first-prompt false)
+          (prompt))
+        (do
+          (print "\n--- Data Stack:\n")
+          (doseq [item (clojure.lang.GershwinStack/seq)]
+            (if (instance? clojure.lang.LazySeq item)
+              (println "(...LazySeq...)")
+              (prn item)
+              ;; (do
+              ;;   (gershwin.lang.RT/print item *out*)
+              ;;   (println))
+              ))
+          (prompt))))))
 
 (defn skip-if-eol
   "If the next character on stream s is a newline, skips it, otherwise
@@ -193,6 +211,12 @@ by default when a new command-line REPL is started."} repl-requires
   `(binding [*read-eval* (if (= :unknown *read-eval*) true *read-eval*)]
      ~@body))
 
+(defn repl-prn
+  "Version of `prn` that is sensitive to setting of *gershwin-eval*, and does not print when that is set to true, since that denotes that values entered at the REPL should be pushed onto the data stack and that the stack should be printed."
+  [& more]
+  (when-not *gershwin-eval*
+    (apply prn more)))
+
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
   writes to *out*, and prints exception summaries to *err*. If you use the
@@ -247,8 +271,8 @@ by default when a new command-line REPL is started."} repl-requires
               prompt      repl-prompt
               flush       flush
               read        repl-read
-              eval        eval
-              print       prn
+              eval        gershwin-eval
+              print       repl-prn
               caught      repl-caught}}
         (apply hash-map options)
         request-prompt (Object.)
@@ -342,6 +366,7 @@ by default when a new command-line REPL is started."} repl-requires
   present"
   [[_ & args] inits]
   (when-not (some #(= eval-opt (init-dispatch (first %))) inits)
+    (println "Gershwin" (gershwin-version))
     (println "Clojure" (clojure-version)))
   (repl :init (fn []
                 (initialize args inits)
