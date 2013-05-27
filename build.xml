@@ -14,6 +14,7 @@
   <property name="cljscript" location="${src}/script"/>
   <property name="test-script" location="${cljscript}/run_tests.clj"/>
   <property name="compile-script" location="${cljscript}/bootstrap_compile.clj"/>
+  <property name="nrepl-script" location="${cljscript}/run_nrepl.clj"/>
   <property name="target" location="target"/>
   <property name="build" location="${target}/classes"/>
   <property name="test-classes" location="${target}/test-classes"/>
@@ -115,6 +116,19 @@
         <path location="${gwnsrc}"/>
       </classpath>
       <arg value="${test-script}"/>
+    </java>
+  </target>
+
+  <target name="run-nrepl"
+          description="Run an nREPL server.">
+    <java classname="gershwin.main" failonerror="true" fork="true">
+      <classpath>
+        <pathelement path="${maven.compile.classpath}"/>
+        <path location="${build}"/>
+	<path location="${cljsrc}"/>
+        <path location="${gwnsrc}"/>
+      </classpath>
+      <arg value="${nrepl-script}"/>
     </java>
   </target>
 
