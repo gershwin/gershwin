@@ -106,6 +106,7 @@ static
 
 	dispatchMacros['^'] = new MetaReader();
 	dispatchMacros['\''] = new VarReader();
+        dispatchMacros['*'] = new WordVarReader();
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
 	dispatchMacros['{'] = new SetReader();
@@ -632,6 +633,15 @@ public static class VarReader extends AFn{
 //				return v;
 //			}
 		return RT.list(THE_VAR, o);
+	}
+}
+
+public static class WordVarReader extends AFn{
+	public Object invoke(Object reader, Object quote) {
+		PushbackReader r = (PushbackReader) reader;
+		Object o = read(r, true, null, true);
+                String wordName = o.toString() + RT.GERSHWIN_SUFFIX;
+		return RT.list(THE_VAR, Symbol.intern(wordName));
 	}
 }
 
