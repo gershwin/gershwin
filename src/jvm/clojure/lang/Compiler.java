@@ -555,6 +555,8 @@ static class DefExpr implements Expr{
 
         /**
          * Create a def and delegate to DefExpr
+         *
+         * TODO Skip past 'defword' at the beginning of this method.
          */
 	static class Parser implements IParser{
             public Expr parse(C context, Object form) {
@@ -570,9 +572,28 @@ static class DefExpr implements Expr{
                 }
                 Symbol gershwinSym = gershwinSymbol(nameSym);
                 String docString = null;
+                // Optional docstring and/or metadata
                 if (RT.third(form) instanceof String) {
                     // System.out.println("DOCSTRING");
-                    meta = meta.assoc(RT.DOC_KEY, RT.third(form));
+                    if (RT.nth(form, 3) instanceof IPersistentMap) {
+                        // Optional metadata on top of optional docstring
+                        meta = meta.assoc(RT.DOC_KEY, RT.third(form));
+			for(ISeq s = RT.seq(RT.nth(form, 3)); s != null; s = s.next()) {
+                            IMapEntry kv = (IMapEntry) s.first();
+                            meta = meta.assoc(kv.getKey(), kv.getValue());
+			}
+                        form = RT.next(RT.next(RT.next(RT.next(form))));
+                    } else {
+                        // Just optional docstring
+                        meta = meta.assoc(RT.DOC_KEY, RT.third(form));
+                        form = RT.next(RT.next(RT.next(form)));
+                    }
+                } else if(RT.third(form) instanceof IPersistentMap) {
+                    // Just optional metadata, no optional docstring
+                    for(ISeq s = RT.seq(RT.third(form)); s != null; s = s.next()) {
+                        IMapEntry kv = (IMapEntry) s.first();
+                        meta = meta.assoc(kv.getKey(), kv.getValue());
+                    }
                     form = RT.next(RT.next(RT.next(form)));
                 } else {
                     // System.out.println("NO DOCSTRING");
