@@ -665,6 +665,7 @@ static class DefExpr implements Expr{
         IPersistentCollection wrappedForms = PersistentVector.EMPTY;
         for(ISeq s = (ISeq) form; s != null; s = s.next()) {
             Object o = s.first();
+            // System.out.println("Raw form to wrap: " + o);
             boolean handled = false;
             // TODO Consider necessity and whether or not name munged var
             //   needs support as well.
@@ -680,30 +681,34 @@ static class DefExpr implements Expr{
                     }
                 }
             } else if(o instanceof Symbol) {
-                // System.out.println("MUNGE WORD SYMBOL");
+                // System.out.println("MUNGE WORD SYMBOL: " + o);
                 Symbol aSym = (Symbol) o;
                 Symbol maybeVarSym = Symbol.intern(aSym.toString() + RT.GERSHWIN_SUFFIX);
                 // System.out.println("Maybe it's this Gershwin word.... ? " + maybeVarSym);
                 Object maybeVar = maybeResolveIn((Namespace) RT.CURRENT_NS.deref(), maybeVarSym);
                 if(maybeVar != null && maybeVar instanceof Var) {
+                    // System.out.println("MUNGE is Var: " + maybeVar);
                     Var bVar = (Var) maybeVar;
-                    if(bVar.isBound()) {
-                        IPersistentMap bVarMeta = bVar.meta();
-                        if(bVarMeta != null && bVarMeta.containsKey(wordKey)) {
-                            // This is a Gershwin word, it's definition is already wrapped.
-                            if(RT.booleanCast(bVarMeta.valAt(wordKey))) {
-                                // System.out.println("Name-munged Gershwin Word var: " + bVar);
-                                wrappedForms = RT.conj(wrappedForms, withInvoke(bVar));
-                                handled = true;
-                            }
+                    IPersistentMap bVarMeta = bVar.meta();
+                    // System.out.println("MUNGE Var metadata is: " + bVarMeta);
+                    if(bVarMeta != null && bVarMeta.containsKey(wordKey)) {
+                        // System.out.println("MUNGE Var is Word: " + bVarMeta);
+                        // This is a Gershwin word, it's definition is already wrapped.
+                        if(RT.booleanCast(bVarMeta.valAt(wordKey))) {
+                            // System.out.println("Name-munged Gershwin Word var: " + bVar);
+                            wrappedForms = RT.conj(wrappedForms, withInvoke(bVar));
+                            handled = true;
                         }
                     }
+                    // if(bVar.isBound()) {
+                    // }
                 }
             }
             // Put it on the stack by default.
             if(!handled)
                 wrappedForms = RT.conj(wrappedForms, withConjIt(o));
         }
+        // System.out.println("FINAL WRAPPED: " + wrappedForms);
         return wrappedForms;
     }
 
