@@ -9,7 +9,9 @@
   [& body]
   `(do ~@body :gershwin.core/stack-void))
 
-(defmacro add-meta! [name meta]
+(defmacro add-meta!
+  "Utility macro for adding metadata to an existing var. This is required for the definition of `declare-word`, because metadata included inline in the macro definition is not added to the resultant var."
+  [name meta]
   `(alter-meta! (var ~name) merge ~meta))
 
 (defmacro declare-word
@@ -20,8 +22,8 @@
       (declare ~gershwin-sym)
       (add-meta! ~gershwin-sym {clojure.lang.Compiler/wordKey true}))))
 
-(declare gershwin-symbol)
 (defmacro word-var
+  "A macro that provides the equivalent of the #* reader macro. Given a symbol, return the var that references a Gershwin word with the same name."
   [sym]
   (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
     `(var ~gershwin-sym)))
@@ -106,7 +108,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 (defn
   gershwin-version
   "Returns Gershwin version as a printable string."
-  {:added "1.0"}
+  {:added "0.2.0"}
   []
   (str (:major *gershwin-version*)
        "."
@@ -119,12 +121,14 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
          "-SNAPSHOT")))
 
 ;; ## Stack Printing ##
+
 (def ^:dynamic
   ^{:doc
     "Used at the REPL, if set to true the contents of the data stack will be printed after each read-eval-print loop."}
   *print-stack* true)
 
 ;; ## Evaluation ##
+
 (def ^:dynamic
   ^{:doc
     "When true, forms will be wrapped for Gershwin evaluation (data items will be pushed onto the stack, words and quotations will be invoked in place)."}
@@ -180,19 +184,20 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x y invocable -- ...]
   (pop-n-swap (pop-it)) ;
 
-: clear [] (stack-void (stack-clear)) ;
+: clear "Remove all items from the data stack." [] (stack-void (stack-clear)) ;
 
-: pr [n --] (stack-void (ap pr)) ;
+: pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) ;
 
-: prn [n --] (stack-void (ap prn)) ;
+: prn "Print TOS plus a newline in a way that can be re-read by Clojure." [n --] (stack-void (ap prn)) ;
 
-: print [n --] (stack-void (ap print)) ;
+: print "Print TOS in a human-readable fashion." [n --] (stack-void (ap print)) ;
 
-: println [n --] (stack-void (ap println)) ;
+: println "Print TOS plus a newline in a human-readable fashion." [n --] (stack-void (ap println)) ;
 
-: nil? [x -- ?] (ap nil?) ;
+: nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
+  [x -- ?] (ap nil?) ;
 
-: ^{:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
+: ^{:added "0.2.0" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   meta
   [x -- y]
   (ap meta) ;
@@ -224,6 +229,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 ;; ### Booleans ###
 
 : if
+  "The boolean 'if'. Expects both a \"then\" and an \"else\" quotation."
   [? then else -- ...]
   (let [else-quot (pop-it)
         then-quot (pop-it)
@@ -263,25 +269,29 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 ;; ### Basic Math ###
 
-: + [n n -- n] (ap 2 +) ;
+: + "Return the sum of the top two items on TOS."
+  [n n -- n] (ap 2 +) ;
 
-: - [n n -- n] (pop-n-swap -) ;
+: - "Return the difference of the top two items on TOS."
+  [n n -- n] (pop-n-swap -) ;
 
-: * [n n -- n] (ap 2 *) ;
+: * "Return the product of the top two items on TOS."
+  [n n -- n] (ap 2 *) ;
 
-: < [n n -- ?] (pop-n-swap <) ;
+: div "Return the quotient of the top two items on TOS."
+  [n n -- n] (pop-n-swap /) ;
 
-: > [n n -- ?] (pop-n-swap >) ;
+: < "Returns true if a is less than b." [a b -- ?] (pop-n-swap <) ;
 
-: <= [n n -- ?] (pop-n-swap <=) ;
+: > "Returns true if a is greater than b." [a b -- ?] (pop-n-swap >) ;
 
-: >= [n n -- ?] (pop-n-swap >=) ;
+: <= "Returns true if a is less than or equal to b." [a b -- ?] (pop-n-swap <=) ;
 
-: div [n n -- n] (pop-n-swap /) ;
+: >= "Returns true if a is greater than or equal to b." [a b -- ?] (pop-n-swap >=) ;
 
-: odd? [n -- ?] (ap odd?) ;
+: odd? "Returns true if the value on TOS is an odd integer." [n -- ?] (ap odd?) ;
 
-: even? [n -- ?] (ap even?) ;
+: even? "Returns true if the value on TOS is an even integer." [n -- ?] (ap even?) ;
 
 ;; ### Equality ###
 
