@@ -137,7 +137,15 @@
 (defmethod print-dup clojure.lang.Symbol [o w] (print-method o w))
 
 (defmethod print-method clojure.lang.Var [o, ^Writer w]
-  (print-simple o w))
+  (if (get (meta o) clojure.lang.Compiler/wordKey)
+    (do
+      (.write w "#*")
+      (let [var-name (.toString o)
+            gershwin-name (-> var-name
+                              (.substring 0 (- (count var-name) 7))
+                              (.substring 2))]
+        (.write w gershwin-name)))
+    (print-simple o w)))
 
 (defmethod print-dup clojure.lang.Var [^clojure.lang.Var o, ^Writer w]
   (.write w (str "#=(var " (.name (.ns o)) "/" (.sym o) ")")))
