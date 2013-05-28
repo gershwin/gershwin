@@ -4,18 +4,29 @@
 
 ;; ## Clojure Interop ## ;;
 
-(defmacro declare-word
-  "Do name munging to declare a Gershwin word."
-  [sym]
-  (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
-    `(declare ~gershwin-sym)))
-
-;; ## Stack Manipulation ##
-
 (defmacro stack-void
   "The keyword :gershwin.core/stack-void is a special value that the stack will refuse to accept. Use this to evaluate Clojure but to prevent the return value of the Clojure expression from being added to the stack."
   [& body]
   `(do ~@body :gershwin.core/stack-void))
+
+(defmacro add-meta! [name meta]
+  `(alter-meta! (var ~name) merge ~meta))
+
+(defmacro declare-word
+  "Do name munging to declare a Gershwin word."
+  [sym]
+  (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
+    `(stack-void
+      (declare ~gershwin-sym)
+      (add-meta! ~gershwin-sym {clojure.lang.Compiler/wordKey true}))))
+
+(declare gershwin-symbol)
+(defmacro word-var
+  [sym]
+  (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
+    `(var ~gershwin-sym)))
+
+;; ## Stack Manipulation ##
 
 (defn stack-clear
   "Clear the data stack."
