@@ -85,7 +85,7 @@ static final Keyword staticKey = Keyword.intern(null, "static");
 static final Keyword arglistsKey = Keyword.intern(null, "arglists");
 static final Symbol INVOKE_STATIC = Symbol.intern("invokeStatic");
 static final Keyword stackEffectKey = Keyword.intern(null, "stack-effect");
-static final Keyword wordKey = Keyword.intern(null, "gershwin-word");
+public static final Keyword wordKey = Keyword.intern(null, "gershwin-word");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
 static final Keyword implementsKey = Keyword.intern(null, "implements");
