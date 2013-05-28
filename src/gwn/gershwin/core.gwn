@@ -1,7 +1,16 @@
-(ns gershwin.core
+(ns ^{:doc "Gershwin is a stack-based, concatenative programming language with a Clojure runtime targeting the JVM. It combines all of Clojure's semantics with an accompanying API inspired by the Factor programming language."}
+  gershwin.core
   (:import [clojure.lang GershwinStack GershwinStack$StackUnderflowException]))
 
-;; Stack Manipulation ;;
+;; ## Clojure Interop ## ;;
+
+(defmacro declare-word
+  "Do name munging to declare a Gershwin word."
+  [sym]
+  (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
+    `(declare ~gershwin-sym)))
+
+;; ## Stack Manipulation ##
 
 (defmacro stack-void
   "The keyword :gershwin.core/stack-void is a special value that the stack will refuse to accept. Use this to evaluate Clojure but to prevent the return value of the Clojure expression from being added to the stack."
@@ -57,7 +66,7 @@
   "x y z --> z y x and pass it that way to a Clojure function."
   [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
 
-;; Gershwin Version ;;
+;; ## Gershwin & Clojure Versions ##
 
 (let [properties (with-open [version-stream (.getResourceAsStream
                                              (clojure.lang.RT/baseLoader)
@@ -98,13 +107,13 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
        (when (:interim *gershwin-version*)
          "-SNAPSHOT")))
 
-;; Printing ;;
+;; ## Stack Printing ##
 (def ^:dynamic
   ^{:doc
     "Used at the REPL, if set to true the contents of the data stack will be printed after each read-eval-print loop."}
   *print-stack* true)
 
-;; Evaluation ;;
+;; ## Evaluation ##
 (def ^:dynamic
   ^{:doc
     "When true, forms will be wrapped for Gershwin evaluation (data items will be pushed onto the stack, words and quotations will be invoked in place)."}
@@ -134,7 +143,31 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
     `'~gershwin-sym))
 
-;; Gershwin Programming Language ;;
+;; ## Gershwin Word Definitions ##
+
+;; ### Invocation/Application ###
+
+: invoke "Invoke an IInvocable (quotations). The quotation itself puts things on the stack, so the result of the invocation itself is ignored."
+  [quot -- ...]
+  (stack-void (.invoke (pop-it))) ;
+
+: apply "Apply the item on TOS to the second item as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
+
+  Example: {:answer 42} :answer apply"
+  [x invocable -- ...]
+  (ap (pop-it)) ;
+
+: apply2 "Same as apply, but apply the invocable to top two items on TOS."
+  [x y invocable -- ...]
+  (ap 2 (pop-it)) ;
+
+: apply3 "Same as apply, but apply the invocable to top three items on TOS."
+  [x y z invocable -- ...]
+  (ap 3 (pop-it)) ;
+
+: apply-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
+  [x y invocable -- ...]
+  (pop-n-swap (pop-it)) ;
 
 : clear [] (stack-void (stack-clear)) ;
 
@@ -177,7 +210,47 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x -- ?]
   (ap fn?) ;
 
-;; Basic Math ;;
+;; ### Booleans ###
+
+: if
+  [? then else -- ...]
+  (let [else-quot (pop-it)
+        then-quot (pop-it)
+        condition (pop-it)]
+    (if condition
+      (stack-void (.invoke then-quot))
+      (stack-void (.invoke else-quot)))) ;
+
+;; ### Shuffle Words ###
+
+;; The basic shuffle words are drop, swap, dup, and rot
+
+: drop "Remove the item at the TOS."
+  [x --]
+  (stack-void (pop-it)) ;
+
+: . "Convenience binding for `drop`" [x --] drop ;
+
+: swap "Swaps the two items on TOS."
+  [x y -- y x]
+  (let [y (pop-it)
+        x (pop-it)]
+    (conj-it y) x) ;
+
+: dup "Duplicate the TOS."
+  [x -- x x]
+  (st-peek) ;
+
+: rot "Rotate the items on TOS as shown in stack effect. Factor docs note this as deprecated, but it's still used in the definition of core words."
+  [x y z -- y z x]
+  (let [z (pop-it)
+        y (pop-it)
+        x (pop-it)]
+    (conj-it y) (conj-it z) x) ;
+
+
+
+;; ### Basic Math ###
 
 : + [n n -- n] (ap 2 +) ;
 
@@ -199,7 +272,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : even? [n -- ?] (ap even?) ;
 
-;; Equality ;;
+;; ### Equality ###
 
 : = [x x -- ?] (ap 2 =) ;
 
