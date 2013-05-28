@@ -122,13 +122,14 @@
         (do
           (print "\n--- Data Stack:\n")
           (doseq [item (clojure.lang.GershwinStack/seq)]
-            (if (instance? clojure.lang.LazySeq item)
-              (println "(...LazySeq...)")
-              (prn item)
-              ;; (do
-              ;;   (gershwin.lang.RT/print item *out*)
-              ;;   (println))
-              ))
+            (cond
+             (instance? clojure.lang.LazySeq item)
+             (println "(...LazySeq...)")
+
+             ;; For possible future print exceptions
+
+             :else
+             (prn item)))
           (prompt))))))
 
 (defn skip-if-eol
