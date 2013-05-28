@@ -5200,7 +5200,8 @@
          (finally
           (. clojure.lang.Var (popThreadBindings)))))))
 
-(def ^{:doc "Set of all Clojure core namespaces. Used in the ns macro to avoid doing (refer 'gershwin.core) inside of Clojure itself, since Gershwin relies on Clojure."}
+(def ^{:private true
+       :doc "Set of all Clojure core namespaces. Used in the ns macro to avoid doing (refer 'gershwin.core) inside of Clojure itself, since Gershwin relies on Clojure."}
   clojure-core-namespaces
   #{'clojure.core
     'clojure.core.protocols
