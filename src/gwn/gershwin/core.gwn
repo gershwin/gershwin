@@ -115,7 +115,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   {:added "0.2.0"}
   [form]
   (if *gershwin-eval*
-    (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForms form))))
+    (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForm form))))
     (. clojure.lang.Compiler (eval form))))
 
 (def ^{:private true
