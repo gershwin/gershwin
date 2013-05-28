@@ -3,6 +3,11 @@
 
 ;; Stack Manipulation ;;
 
+(defmacro stack-void
+  "The keyword :gershwin.core/stack-void is a special value that the stack will refuse to accept. Use this to evaluate Clojure but to prevent the return value of the Clojure expression from being added to the stack."
+  [& body]
+  `(do ~@body :gershwin.core/stack-void))
+
 (defn stack-clear
   "Clear the data stack."
   []
@@ -129,6 +134,48 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
     `'~gershwin-sym))
 
+;; Gershwin Programming Language ;;
+
+: clear [] (stack-void (stack-clear)) ;
+
+: pr [n --] (stack-void (ap pr)) ;
+
+: prn [n --] (stack-void (ap prn)) ;
+
+: print [n --] (stack-void (ap print)) ;
+
+: println [n --] (stack-void (ap println)) ;
+
+: nil? [x -- ?] (ap nil?) ;
+
+: ^{:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
+  meta
+  [x -- y]
+  (ap meta) ;
+
+: type "Get an item's type"
+  [x -- y]
+  (ap type) ;
+
+: class "Get an item's class"
+  [x -- y]
+  (ap class) ;
+
+: ancestors "Put immediate and indirect parents of item on TOS."
+  [x -- coll]
+  (ap ancestors) ;
+
+: symbol "Coerce TOS to a symbol"
+  [x -- y]
+  (ap symbol) ;
+
+: symbol? "True if TOS is a symbol"
+  [x -- ?]
+  (ap symbol?) ;
+
+: function? "True if TOS is a fn"
+  [x -- ?]
+  (ap fn?) ;
 
 ;; Basic Math ;;
 
@@ -151,6 +198,12 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : odd? [n -- ?] (ap odd?) ;
 
 : even? [n -- ?] (ap even?) ;
+
+;; Equality ;;
+
+: = [x x -- ?] (ap 2 =) ;
+
+: == [n n -- ?] (ap 2 ==) ;
 
 (comment
   ;; When working at nREPL, pending better integration
