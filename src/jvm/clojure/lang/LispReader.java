@@ -85,13 +85,12 @@ static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
-        macros['|'] = new CommentReader();
+        // macros['|'] = new CommentReader();
 	macros['\''] = new WrappingReader(QUOTE);
 	macros['@'] = new WrappingReader(DEREF);//new DerefReader();
 	macros['^'] = new MetaReader();
 	macros['`'] = new SyntaxQuoteReader();
 	macros['~'] = new UnquoteReader();
-        macros['«'] = new QuotationReader();
 	macros['('] = new ListReader();
 	macros[')'] = new UnmatchedDelimiterReader();
 	macros['['] = new VectorReader();
@@ -109,6 +108,7 @@ static
         dispatchMacros['*'] = new WordVarReader();
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
+        dispatchMacros['['] = new QuotationReader();
 	dispatchMacros['{'] = new SetReader();
 	dispatchMacros['='] = new EvalReader();
 	dispatchMacros['!'] = new CommentReader();
@@ -469,7 +469,7 @@ static private boolean isTerminatingMacro(int ch){
                     line = ((LineNumberingPushbackReader) r).getLineNumber();
                     column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
                 }
-            List list = readDelimitedList('»', r, true);
+            List list = readDelimitedList(']', r, true);
             IObj s = (IObj) RT.cons(Compiler.QUOTATION, PersistentList.create(list));
             if(line != -1)
                 {
