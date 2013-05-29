@@ -164,67 +164,148 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : invoke "Invoke an IInvocable (quotations). The quotation itself puts things on the stack, so the result of the invocation itself is ignored."
   [quot -- ...]
-  (stack-void (.invoke (pop-it))) ;
+  (stack-void (.invoke (pop-it))) .
 
 : apply "Apply the item on TOS to the second item as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
 
   Example: {:answer 42} :answer apply"
   [x invocable -- ...]
-  (ap (pop-it)) ;
+  (ap (pop-it)) .
 
 : apply2 "Same as apply, but apply the invocable to top two items on TOS."
   [x y invocable -- ...]
-  (ap 2 (pop-it)) ;
+  (ap 2 (pop-it)) .
 
 : apply3 "Same as apply, but apply the invocable to top three items on TOS."
   [x y z invocable -- ...]
-  (ap 3 (pop-it)) ;
+  (ap 3 (pop-it)) .
 
 : apply-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
   [x y invocable -- ...]
-  (pop-n-swap (pop-it)) ;
+  (pop-n-swap (pop-it)) .
 
-: clear "Remove all items from the data stack." [] (stack-void (stack-clear)) ;
+: clear "Remove all items from the data stack." [] (stack-void (stack-clear)) .
 
-: pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) ;
+: pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) .
 
-: prn "Print TOS plus a newline in a way that can be re-read by Clojure." [n --] (stack-void (ap prn)) ;
+: prn "Print TOS plus a newline in a way that can be re-read by Clojure." [n --] (stack-void (ap prn)) .
 
-: print "Print TOS in a human-readable fashion." [n --] (stack-void (ap print)) ;
+: print "Print TOS in a human-readable fashion." [n --] (stack-void (ap print)) .
 
-: println "Print TOS plus a newline in a human-readable fashion." [n --] (stack-void (ap println)) ;
+: println "Print TOS plus a newline in a human-readable fashion." [n --] (stack-void (ap println)) .
 
 : nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
-  [x -- ?] (ap nil?) ;
+  [x -- ?] (ap nil?) .
 
 : ^{:added "0.2.0" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   meta
   [x -- y]
-  (ap meta) ;
+  (ap meta) .
 
 : type "Get an item's type"
   [x -- y]
-  (ap type) ;
+  (ap type) .
 
 : class "Get an item's class"
   [x -- y]
-  (ap class) ;
+  (ap class) .
 
 : ancestors "Put immediate and indirect parents of item on TOS."
   [x -- coll]
-  (ap ancestors) ;
+  (ap ancestors) .
 
 : symbol "Coerce TOS to a symbol"
   [x -- y]
-  (ap symbol) ;
+  (ap symbol) .
 
 : symbol? "True if TOS is a symbol"
   [x -- ?]
-  (ap symbol?) ;
+  (ap symbol?) .
 
 : function? "True if TOS is a fn"
   [x -- ?]
-  (ap fn?) ;
+  (ap fn?) .
+
+;; ### Shuffle Words ###
+
+;; The basic shuffle words are drop, swap, dup, and rot
+
+: drop "Remove the item at the TOS."
+  [x --]
+  (stack-void (pop-it)) .
+
+: ! "Convenience binding for `drop`" [x --] drop .
+
+: swap "Swaps the two items on TOS."
+  [x y -- y x]
+  (let [y (pop-it)
+        x (pop-it)]
+    (conj-it y) x) .
+
+: dup "Duplicate the TOS."
+  [x -- x x]
+  (st-peek) .
+
+: rot "Rotate the items on TOS as shown in stack effect. Factor docs note this as deprecated, but it's still used in the definition of core words."
+  [x y z -- y z x]
+  (let [z (pop-it)
+        y (pop-it)
+        x (pop-it)]
+    (conj-it y) (conj-it z) x) .
+
+;; ### Factor Extensions to Shuffle Words ###
+
+;; These include: drop2, drop3, nip, nip2, dup2, dup3, over, over2, pick
+;; Note: 'pick' differs from what it might mean in most Forths
+;; TODO Factor implements these as primitives, even though they could be implemented
+;;   with the basic shuffle words above. Consider.
+
+: drop2 "Remove top two items from TOS."
+  [x y --]
+  drop drop .
+
+: drop3 "Remove top three items from TOS."
+  [x y z --]
+  drop drop drop .
+
+: nip "Remove second element from TOS."
+  [x y -- y]
+  swap drop .
+
+: nip2 "Remove second and third elements from TOS."
+  [x y z -- z]
+  swap drop swap drop .
+
+: dup2 "Duplicate top two items on TOS."
+  [x y -- x y x y]
+  (let [y (st-peek)
+        x (peek* (st-pop))]
+    (conj-it x) y) .
+
+: dup3 "Duplicate top three items on TOS."
+  [x y z -- x y z x y z]
+  (let [cdr (st-pop)
+        cddr (pop cdr)
+        z (st-peek)
+        y (peek* cdr)
+        x (peek* cddr)]
+    (conj-it x) (conj-it y) z) .
+
+: over "Duplicate second item on TOS."
+  [x y -- x y x]
+  (peek* (st-pop)) .
+
+: over2 "Duplicate second and third items on TOS."
+  [x y z -- x y z x y]
+  (let [cdr (st-pop)
+        cddr (pop cdr)
+        y (peek* cdr)
+        x (peek* cddr)]
+    (conj-it x) y) .
+
+: pick "Duplicate third item on TOS."
+  [x y z -- x y z x]
+  (peek* (pop (st-pop))) .
 
 ;; ### Booleans ###
 
@@ -236,68 +317,210 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
         condition (pop-it)]
     (if condition
       (stack-void (.invoke then-quot))
-      (stack-void (.invoke else-quot)))) ;
+      (stack-void (.invoke else-quot)))) .
 
-;; ### Shuffle Words ###
+: if* "Like `if`, but keeps the conditional value on the stack if it is truthy."
+  [? true false -- ...]
+  pick < drop invoke > < nip2 invoke > if .
 
-;; The basic shuffle words are drop, swap, dup, and rot
+: if-not
+  [? then else -- ...]
+  swap if .
 
-: drop "Remove the item at the TOS."
-  [x --]
-  (stack-void (pop-it)) ;
+: when
+  "'if' with no 'else' branch"
+  [? then -- ...]
+  < > if .
 
-: . "Convenience binding for `drop`" [x --] drop ;
+: when-not
+  [? then -- ...]
+  < > if-not .
 
-: swap "Swaps the two items on TOS."
-  [x y -- y x]
-  (let [y (pop-it)
+: ? "Choose between t or f depending on truthiness of ?"
+  [? t f]
+  rot < drop > < nip > if .
+
+: and "If both values are true, outputs TOS. Else returns false."
+  [x y -- ?]
+  over ? .
+
+: boolean [x -- ?] < true > < false > if .
+
+(declare-word dupd)
+: or "Outputs first truthy value, or false if neither is truthy."
+  [x y -- ?]
+  dupd ? dup < boolean > when-not .
+
+: true? [? -- ?] (ap true?) .
+
+: false? [? -- ?] (ap false?) .
+
+;; ## Dataflow Combinators ##
+
+;; #### Preservering combinators ####
+
+: dip "Remove second item from TOS, execute the quotation on TOS, then restore second item on TOS."
+  [x quot -- x]
+  (let [quot (pop-it)
         x (pop-it)]
-    (conj-it y) x) ;
+    (.invoke quot)
+    x) .
 
-: dup "Duplicate the TOS."
-  [x -- x x]
-  (st-peek) ;
+: dip2 "Remove the second and third items from TOS, execute the quotation on TOS, then restore the second and third items on TOS."
+  [x y quot -- x y]
+  swap #[ dip ] dip .
 
-: rot "Rotate the items on TOS as shown in stack effect. Factor docs note this as deprecated, but it's still used in the definition of core words."
-  [x y z -- y z x]
-  (let [z (pop-it)
-        y (pop-it)
-        x (pop-it)]
-    (conj-it y) (conj-it z) x) ;
+: dip3 "Remove the second, third, and fourth items from TOS, execute the quotation on TOS, then restore the second, third, and fourth items on TOS."
+  [x y z quot -- x y z]
+  swap #[ dip2 ] dip .
 
+: dip4 "Remove the second, third, and fourth items from TOS, execute the quotation on TOS, then restore the second, third, and fourth items on TOS."
+  [w x y z quot -- w x y z]
+  swap #[ dip3 ] dip .
 
+: dupd "Duplicate second item on TOS in-place."
+  [x y -- x x y]
+  #[ dup ] dip .
+
+: keep "As opposed to dip, which removes the second item before executing the quotation, keep keeps the second item on the stack for the quotation's invocation, but then also adds it back again after the quotation has been executed."
+  [..a x quot -- ( ..a x -- ..b ) -- ..b x]
+  over #[ invoke ] dip .
+
+: keep2 "Like keep, but restores first and second items on TOS after invoking quotation with them."
+  [..a x y quot ( ..a x y -- ..b ) -- ..b x y]
+  #[ dup2 ] dip dip2 .
+
+: keep3 "Like keep, but restores first, second, and third items on TOS after invoking quotation with them."
+  [..a x y z quot ( ..a x y z -- ..b ) -- ..b x y z]
+  #[ dup3 ] dip dip3 .
+
+;; #### Cleave combinators ####
+
+;; Cleave operators mean: take a single piece of data and apply n number of quotations to it. These are common patterns for repeated uses of `keep`, which should be evident from their implementation.
+
+: bi "Invoke the two quotations on TOS sequentially with the third item on TOS present for both invocations."
+  [x p q --]
+  #[ keep ] dip invoke .
+
+: bi2 "Same as bi, but work with two pieces of data."
+  [x y p q --]
+  #[ keep2 ] dip invoke .
+
+: bi3 "Same as bi, but work with three pieces of data."
+  [x y z p q --]
+  #[ keep3 ] dip invoke .
+
+: tri "Invoke the three quotations on TOS sequentially with the third item on TOS present for all invocations."
+  [x p q r --]
+  #[ #[ keep ] dip keep ] dip invoke .
+
+: tri2 "Same as tri, but work with two pieces of data."
+  [x y p q r --]
+  #[ #[ keep2 ] dip keep2 ] dip invoke .
+
+: tri3 "Same as tri, but work with three pieces of data."
+  [x y z p q r --]
+  #[ #[ keep3 ] dip keep3 ] dip invoke .
+
+;; NOTE: The `cleave` word requires words we haven't implemented yet. Punting til later.
+
+;; #### Spread combinators ####
+
+;; Spread combinators apply n number of quotations to n (or 2*n) number of values. These are common patterns for repeated uses of dip. The asterisk `*` denotes spread combinators.
+
+: bi* "Apply the two quotations to the two values in order."
+  [x y p q --]
+  #[ dip ] dip invoke .
+
+: bi2* "Apply p to w and x, then apply q to y and z."
+  [w x y z p q --]
+  #[ dip2 ] dip invoke .
+
+: tri* "Apply p to x, q to y, and r to z"
+  [x y z p q r --]
+  #[ #[ dip2 ] dip dip ] dip invoke .
+
+: tri2* "Apply p to u and v, q to w and x, and r to y and z"
+  [u v w x y z p q r --]
+  #[ dip4 ] dip2 bi2* .
+
+;; ### Apply combinators ###
+
+;; Apply combinators apply a single quotation to multiple values. In this way, they are equivalent to using the spread combinators with each quotation being identical. The ampersand `&` denotes apply combinators (The `@` from Factor cannot be used as a Clojure:Gershwin symbol character).
+
+: bi& "Apply the quotation to the top two items on TOS in order."
+  [x y quot --]
+  dup bi* .
+
+: bi2& "Apply the quotation to w and x, and then y and z."
+  [w x y z quot --]
+  dup bi2* .
+
+: tri& "Apply the quotation to the top three items on TOS in order."
+  [x y z quot --]
+  dup dup tri* .
+
+: tri2& "Apply the quotation to u and v, then to w and x, and finally to y and z."
+  [u v w x y z quot --]
+  dup dup tri2* .
+
+: both? "Returns truthy if application of quotation to both values is truthy in each case."
+  [x y quot -- ?]
+  bi& and .
+
+: either? "Returns truthy if either application of quotation produces a truthy value."
+  [x y quot -- ?]
+  bi& or .
 
 ;; ### Basic Math ###
 
 : + "Return the sum of the top two items on TOS."
-  [n n -- n] (ap 2 +) ;
+  [n n -- n] (ap 2 +) .
 
 : - "Return the difference of the top two items on TOS."
-  [n n -- n] (pop-n-swap -) ;
+  [n n -- n] (pop-n-swap -) .
 
 : * "Return the product of the top two items on TOS."
-  [n n -- n] (ap 2 *) ;
+  [n n -- n] (ap 2 *) .
 
 : div "Return the quotient of the top two items on TOS."
-  [n n -- n] (pop-n-swap /) ;
+  [n n -- n] (pop-n-swap /) .
 
-: < "Returns true if a is less than b." [a b -- ?] (pop-n-swap <) ;
+: < "Returns true if a is less than b." [a b -- ?] (pop-n-swap <) .
 
-: > "Returns true if a is greater than b." [a b -- ?] (pop-n-swap >) ;
+: > "Returns true if a is greater than b." [a b -- ?] (pop-n-swap >) .
 
-: <= "Returns true if a is less than or equal to b." [a b -- ?] (pop-n-swap <=) ;
+: <= "Returns true if a is less than or equal to b." [a b -- ?] (pop-n-swap <=) .
 
-: >= "Returns true if a is greater than or equal to b." [a b -- ?] (pop-n-swap >=) ;
+: >= "Returns true if a is greater than or equal to b." [a b -- ?] (pop-n-swap >=) .
 
-: odd? "Returns true if the value on TOS is an odd integer." [n -- ?] (ap odd?) ;
+: odd? "Returns true if the value on TOS is an odd integer." [n -- ?] (ap odd?) .
 
-: even? "Returns true if the value on TOS is an even integer." [n -- ?] (ap even?) ;
+: even? "Returns true if the value on TOS is an even integer." [n -- ?] (ap even?) .
 
 ;; ### Equality ###
 
-: = [x x -- ?] (ap 2 =) ;
+: = [x x -- ?] (ap 2 =) .
 
-: == [n n -- ?] (ap 2 ==) ;
+: == [n n -- ?] (ap 2 ==) .
+
+;; ### String & Regular Expressions ###
+
+: str "Stringify the given item on TOS."
+  [x -- s]
+  (ap str) .
+
+: str2 "Concatenate the top two items as strings."
+  [s s -- s]
+  (pop-n-swap str) .
+
+: str3 "Concatenate the top three items as strings."
+  [s s s -- s]
+  (pop-n-swap2 str) .
+
+: re-pattern "Given a String, put a java.util.Pattern object on TOS. Note that you need to double-escape things per Java's Pattern requirements."
+  [s -- r]
+  (ap re-pattern) .
 
 (comment
   ;; When working at nREPL, pending better integration
