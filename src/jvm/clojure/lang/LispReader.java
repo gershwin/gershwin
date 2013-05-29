@@ -443,7 +443,7 @@ static private boolean isTerminatingMacro(int ch){
                     line = ((LineNumberingPushbackReader) r).getLineNumber();
                     column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
                 }
-            List list = readDelimitedList(';', r, true);
+            List list = readDelimitedList('.', r, true);
             if (list.size() < 3) {
                 throw Util.runtimeException("Too few arguments to ':'. At a minimum, you must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
             } else if(!(list.get(0) instanceof Symbol)) {
