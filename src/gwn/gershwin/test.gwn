@@ -1,0 +1,30 @@
+(ns gershwin.test)
+
+: start-suite [-- v] {} .
+
+: suite-passes? "Returns true if all tests pass"
+  [?s -- ?]
+  dup #[ false? ] filter dup empty?
+  #[ drop count " tests PASSED." str2 println :pass ]
+  #[
+    count " tests FAILED." str2 println
+    "Test Results:\n" swap "\n" str3 println
+    :fail
+  ] if .
+
+: unit-test
+  "Take two quotations, ensure quot-a is what quot-b puts on the stack after being invoked. Supports one nested layer of quotation, such that if quot-a and quot-b evaluate to quotations themselves, the inner quotations will be invoked and their outputs checked for equality."
+  [?s quot-a quot-b -- ?]
+  dip invoke
+  ;; If values are quotations, do one level of invocation
+  dup2 #[ function? ] bi& and
+  ;; If quotation, invoke, else just test with =
+  #[ #[ invoke ] bi& ] when
+  = swap conj .
+
+: run-suite
+  "Wrap a ste of unit tests as necessary to run them and collect results."
+  [quot -- ?]
+  start-suite
+  swap invoke
+  suite-passes? .

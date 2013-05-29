@@ -80,6 +80,7 @@
       <!-- Gershwin -->
       <arg value="gershwin.core"/>
       <arg value="gershwin.main"/>
+      <arg value="gershwin.test"/>
     </java>
   </target>
 
