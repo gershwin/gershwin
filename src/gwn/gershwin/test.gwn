@@ -1,6 +1,6 @@
 (ns gershwin.test)
 
-: start-suite [-- v] {} .
+: start-suite [-- v] [] .
 
 : suite-passes? "Returns true if all tests pass"
   [?s -- ?]
