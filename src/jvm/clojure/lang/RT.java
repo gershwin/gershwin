@@ -367,13 +367,16 @@ public static void loadResourceScript(Class c, String name) throws IOException{
 	loadResourceScript(c, name, true);
 }
 
-public static void loadResourceScript(Class c, String name, boolean failIfNotFound) throws IOException{
+    public static void loadResourceScript(Class c, String name, boolean failIfNotFound) throws IOException{
+        loadResourceScript(c, name, failIfNotFound, false);
+    }
+    public static void loadResourceScript(Class c, String name, boolean failIfNotFound, boolean wrapAsGershwin) throws IOException{
 	int slash = name.lastIndexOf('/');
 	String file = slash >= 0 ? name.substring(slash + 1) : name;
 	InputStream ins = resourceAsStream(baseLoader(), name);
 	if(ins != null) {
 		try {
-			Compiler.load(new InputStreamReader(ins, UTF8), name, file);
+                    Compiler.load(new InputStreamReader(ins, UTF8), name, file, wrapAsGershwin);
 		}
 		finally {
 			ins.close();
