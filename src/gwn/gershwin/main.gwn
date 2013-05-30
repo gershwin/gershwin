@@ -318,8 +318,9 @@ by default when a new command-line REPL is started."} repl-requires
   [^String path]
   (if (.startsWith path "@")
     (RT/loadResourceScript
-     (.substring path (if (.startsWith path "@/") 2 1)))
-    (Compiler/loadFile path)))
+     (.substring path (if (.startsWith path "@/") 2 1))
+     true)
+    (Compiler/loadFile path true)))
 
 (defn- init-opt
   "Load a script"

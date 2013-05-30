@@ -7215,7 +7215,10 @@ private static Symbol tagOf(Object o){
 	return null;
 }
 
-public static Object loadFile(String file) throws IOException{
+    public static Object loadFile(String file) throws IOException{
+        return loadFile(file, false);
+    }
+    public static Object loadFile(String file, boolean wrapAsGershwin) throws IOException{
 //	File fo = new File(file);
 //	if(!fo.exists())
 //		return null;
@@ -7223,7 +7226,7 @@ public static Object loadFile(String file) throws IOException{
 	FileInputStream f = new FileInputStream(file);
 	try
 		{
-		return load(new InputStreamReader(f, RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName());
+                    return load(new InputStreamReader(f, RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName(), wrapAsGershwin);
 		}
 	finally
 		{
@@ -7235,7 +7238,11 @@ public static Object load(Reader rdr) {
 	return load(rdr, null, "NO_SOURCE_FILE");
 }
 
-public static Object load(Reader rdr, String sourcePath, String sourceName) {
+    public static Object load(Reader rdr, String sourcePath, String sourceName) {
+        return load(rdr, sourcePath, sourceName, false);
+    }
+
+    public static Object load(Reader rdr, String sourcePath, String sourceName, boolean wrapAsGershwin) {
 	Object EOF = new Object();
 	Object ret = null;
 	LineNumberingPushbackReader pushbackReader =
@@ -7267,7 +7274,10 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			{
 			LINE_AFTER.set(pushbackReader.getLineNumber());
 			COLUMN_AFTER.set(pushbackReader.getColumnNumber());
-			ret = eval(r,false);
+                        if(wrapAsGershwin)
+                            ret = eval(wrapGershwinForm(r),false);
+                        else
+                            ret = eval(r,false);
 			LINE_BEFORE.set(pushbackReader.getLineNumber());
 			COLUMN_BEFORE.set(pushbackReader.getColumnNumber());
 			}
