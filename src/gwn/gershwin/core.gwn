@@ -184,7 +184,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x y invocable -- ...]
   (pop-n-swap (pop-it)) .
 
-: clear "Remove all items from the data stack." [] (stack-void (stack-clear)) .
+;; ### Namespaces ###
+
+: in-ns "Change to the specific namespace, creating it if needed."
+  [ns --]
+  (stack-void (ap in-ns)) .
 
 : pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) .
 
@@ -235,6 +239,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   (stack-void (pop-it)) .
 
 : ! "Convenience binding for `drop`" [x --] drop .
+
+: clear "Remove all items from the data stack." [] (stack-void (stack-clear)) .
 
 : swap "Swaps the two items on TOS."
   [x y -- y x]
@@ -321,7 +327,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : if* "Like `if`, but keeps the conditional value on the stack if it is truthy."
   [? true false -- ...]
-  pick < drop invoke > < nip2 invoke > if .
+  pick #[ drop invoke ] #[ nip2 invoke ] if .
 
 : if-not
   [? then else -- ...]
@@ -330,26 +336,26 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : when
   "'if' with no 'else' branch"
   [? then -- ...]
-  < > if .
+  #[ ] if .
 
 : when-not
   [? then -- ...]
-  < > if-not .
+  #[ ] if-not .
 
 : ? "Choose between t or f depending on truthiness of ?"
   [? t f]
-  rot < drop > < nip > if .
+  rot #[ drop ] #[ nip ] if .
 
 : and "If both values are true, outputs TOS. Else returns false."
   [x y -- ?]
   over ? .
 
-: boolean [x -- ?] < true > < false > if .
+: boolean [x -- ?] #[ true ] #[ false ] if .
 
 (declare-word dupd)
 : or "Outputs first truthy value, or false if neither is truthy."
   [x y -- ?]
-  dupd ? dup < boolean > when-not .
+  dupd ? dup #[ boolean ] when-not .
 
 : true? [? -- ?] (ap true?) .
 
@@ -503,6 +509,175 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : = [x x -- ?] (ap 2 =) .
 
 : == [n n -- ?] (ap 2 ==) .
+
+;; ### Sequences, Collections ###
+
+: get [key m -- x] (ap 2 get) .
+
+: aget [idx java-array -- x] (ap 2 aget) .
+
+: first [coll -- x] (ap first) .
+
+: second [coll -- x] (ap second) .
+
+: last [coll -- x] (ap last) .
+
+: peek [vector -- x] (ap peek) .
+
+: conj [x coll -- coll] (ap 2 conj) .
+
+: cons [x coll -- coll] (pop-n-swap cons) .
+
+: assoc [v k coll -- coll] (ap 3 assoc) .
+
+: dissoc [k coll -- coll] (ap 2 dissoc) .
+
+: keys [coll -- coll] (ap keys) .
+
+: values [coll -- coll] (ap vals) .
+
+: get-in [keys m -- x]
+  (ap 2 get-in) .
+
+;; Arg order like assoc ?
+: update-in [quot keys coll]
+  (let [coll (pop-it)
+        keys (pop-it)
+        quot (pop-it)]
+    (conj-it (get-in coll keys))
+    (.invoke quot)
+    (assoc-in coll keys (pop-it))) .
+
+: nth [n coll -- x] (ap 2 nth) .
+
+: count [coll -- n] (ap count) .
+
+: alength [java-array -- n] (ap alength) .
+
+: empty? [coll -- ?] (ap empty?) .
+
+: contains?
+  [item coll -- ?]
+  (ap 2 contains?) .
+
+: some "Puts the first truthy value generated from invoking the given quotation for each item in the collection, else puts nil on TOS."
+  [coll quot]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (loop [coll coll]
+      (if (seq coll)
+        (do
+          (conj-it (first coll))
+          (.invoke quot)
+          (if (pop-it)
+            (first coll)
+            (recur (rest coll))))
+        nil))) .
+
+: has-any? "Same as member?, but expects a collection of items to check for instead of a single one."
+  [subcoll coll -- item-or-nil]
+  swap clojure.core/set apply clojure.core/some apply2 .
+
+: member? "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
+  [item coll -- item-or-nil]
+  swap [] conj swap has-any? .
+
+: map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
+  [coll quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (lazy-seq
+     (loop [coll coll final []]
+       (if (seq coll)
+         (do
+           (conj-it (first coll))
+           (.invoke quot)
+           (recur (rest coll) (conj final (pop-it))))
+         final)))) .
+
+: reduce "Given a collection and a quotation that expects two items off the stack, calls the quotation with the first two items of the collection, followed by invoking the quotation using that result and subsequent items from the collection.
+
+If the collection is empty, returns nil. If the collection contains only one item, that item is put on TOS and the quotation is not invoked."
+  [coll quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (cond
+     (empty? coll) nil
+
+     (= (count coll) 1) (first coll)
+
+     :else
+     (do (conj-it (first coll))
+         (conj-it (second coll))
+         (.invoke quot)
+         (if (> (count coll) 2)
+           (loop [coll (rest (rest coll))]
+             (if (seq coll)
+               (do
+                 (conj-it (first coll))
+                 (.invoke quot)
+                 (recur (rest coll)))
+               ::stack-void))
+           ::stack-void)))) .
+
+: reduce-with "Like reduce, but begins the reduction by invoking the quotation using the specified \"accumulator\" and the first item from the collection, instead of the first two items from the collection like `reduce` does."
+  [coll acc quot -- coll]
+  (let [quot (pop-it)
+        acc  (pop-it)
+        coll (pop-it)]
+    (cond
+     (empty? coll) nil
+
+     (= (count coll) 1) (first coll)
+
+     :else
+     (do (conj-it acc)
+         (conj-it (first coll))
+         (.invoke quot)
+         (if (> (count coll) 2)
+           (loop [coll (rest coll)]
+             (if (seq coll)
+               (do
+                 (conj-it (first coll))
+                 (.invoke quot)
+                 (recur (rest coll)))
+               ::stack-void))
+           ::stack-void)))) .
+
+
+: filter "Replace the collection with one including only those items that return truthy for the given predicate quotation."
+  [coll pred-quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (lazy-seq
+     (loop [coll coll final []]
+       (if (seq coll)
+         (do
+           (conj-it (first coll))
+           (.invoke quot)
+           (if (pop-it)
+             (recur (rest coll) (conj final (first coll)))
+             (recur (rest coll) final)))
+         final)))) .
+
+: remove "Opposite of filter. Replace collection with one including only those items that return falsey for the given predicate."
+  [coll pred-quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (lazy-seq
+     (loop [coll coll final []]
+       (if (seq coll)
+         (do
+           (conj-it (first coll))
+           (.invoke quot)
+           (if-not (pop-it)
+             (recur (rest coll) (conj final (first coll)))
+             (recur (rest coll) final)))
+         final)))) .
+
+: take "Put a lazy collection on TOS that consists of the first n items from the original collection."
+  [coll n -- coll]
+  (ap 2 take) .
 
 ;; ### String & Regular Expressions ###
 
