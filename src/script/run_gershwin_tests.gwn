@@ -1,0 +1,15 @@
+(ns run-gershwin-tests
+  (:require-words [gershwin.test :refer [run-suite]])
+  (:require-words [gershwin.test-gershwin.core :refer [suite]]))
+
+"\nRunning Gershwin Test Suite\n\n" print
+
+#[ suite ] run-suite
+
+:fail = #[ (System/exit 1) ] when
+
+"\n" print
+
+(comment
+  (require-words '[gershwin.test :refer [run-suite]])
+  )

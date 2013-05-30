@@ -114,7 +114,7 @@
 	    <configuration>
 	      <target>
                 <property name="maven.compile.classpath" refid="maven.compile.classpath" />
-		<ant target="compile-gershwin" />
+		<ant target="compile-clojure" />
 	      </target>
 	    </configuration>
 	  </execution>
@@ -127,7 +127,33 @@
 	    <configuration>
 	      <target>
                 <property name="maven.test.classpath" refid="maven.test.classpath" />
-		<ant target="test" />
+		<ant target="test-clojure" />
+	      </target>
+	    </configuration>
+	  </execution>
+	  <execution>
+	    <id>gershwin-compile</id>
+	    <phase>compile</phase>
+	    <goals>
+	      <goal>run</goal>
+	    </goals>
+	    <configuration>
+	      <target>
+                <property name="maven.compile.classpath" refid="maven.compile.classpath" />
+		<ant target="compile-gershwin" />
+	      </target>
+	    </configuration>
+	  </execution>
+	  <execution>
+	    <id>gershwin-test</id>
+	    <phase>test</phase>
+	    <goals>
+	      <goal>run</goal>
+	    </goals>
+	    <configuration>
+	      <target>
+                <property name="maven.test.classpath" refid="maven.test.classpath" />
+		<ant target="test-gershwin" />
 	      </target>
 	    </configuration>
 	  </execution>
