@@ -5402,6 +5402,13 @@
               (load-one lib need-ns require)
               @*loaded-libs*))))
 
+(defn- gershwin-refer-filter-opts
+  [opts]
+  (if-let [refers (:refer opts)]
+    (assoc opts :refer (for [sym refers]
+                         (symbol (str sym clojure.lang.RT/GERSHWIN_SUFFIX))))
+    opts))
+
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
@@ -5409,14 +5416,17 @@
             "lib names inside prefix lists must not contain periods")
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
-        {:keys [as reload reload-all require use verbose]} opts
+        {:keys [as reload reload-all require require-words use verbose]} opts
         loaded (contains? @*loaded-libs* lib)
         load (cond reload-all
                    load-all
                    (or reload (not require) (not loaded))
                    load-one)
         need-ns (or as use)
-        filter-opts (select-keys opts '(:exclude :only :rename :refer))
+        filter-opts (let [raw-filter-opts (select-keys opts '(:exclude :only :rename :refer))]
+                      (if require-words
+                        (gershwin-refer-filter-opts raw-filter-opts)
+                        raw-filter-opts))
         undefined-on-entry (not (find-ns lib))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
@@ -5450,7 +5460,7 @@
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
     ; check for unsupported options
-    (let [supported #{:as :reload :reload-all :require :use :verbose :refer}
+    (let [supported #{:as :reload :reload-all :require :require-words :use :verbose :refer}
           unsupported (seq (remove supported flags))]
       (throw-if unsupported
                 (apply str "Unsupported option(s) supplied: "
@@ -5543,6 +5553,11 @@
 
   [& args]
   (apply load-libs :require args))
+
+(defn require-words
+  "Like 'require, but does Gershwin name-munging of symbols that are referenced via :refer."
+  [& args]
+  (apply load-libs :require :require-words args))
 
 (defn use
   "Like 'require, but also refers to each lib's namespace using
