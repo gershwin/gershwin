@@ -9,7 +9,3 @@
 :fail = #[ (System/exit 1) ] when
 
 "\n" print
-
-(comment
-  (require-words '[gershwin.test :refer [run-suite]])
-  )
