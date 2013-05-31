@@ -1,0 +1,22 @@
+(ns gershwin.test-gershwin.string
+  (:require-words [gershwin.test :refer [unit-test]])
+  (:require-words [gershwin.string :as string]))
+
+: suite []
+  #[ "42" ] #[ 42 str ] unit-test
+  #[ "blue 42" ] #[ "blue " 42 str2 ] unit-test
+  #[ "red white blue" ] #[ "red " "white " "blue" str3 ] unit-test
+  #[ "football" ] #[ "llabtoof" string/reverse ] unit-test
+  #[ "fzz" ] #[ "foo" "o" "z" string/replace ] unit-test
+  #[ "XnXmXtXpXXXX" ]
+  #[
+    "onomatopoeia"
+    #"[aeiou]" "X"
+    string/replace
+    ] unit-test
+  #[ "fYYtbYll"]
+  #[
+    "football"
+    "[ao]" re-pattern "Y"
+    string/replace
+    ] unit-test .

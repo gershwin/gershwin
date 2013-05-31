@@ -1,0 +1,10 @@
+(ns gershwin.string
+  (:require [clojure.string :as string]))
+
+: reverse [s -- s] (ap string/reverse) .
+
+: replace [s match replacment -- s]
+  (let [rep (pop-it)
+        match (pop-it)
+        s (pop-it)]
+    (string/replace s match rep)) .
