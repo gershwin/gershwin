@@ -9,7 +9,7 @@
   #[ 1 ] #[ 3 2 clojure.core/- apply-swap ] unit-test
 
   ;; Types
-  [] #[ true ] #[ 'foo symbol? ] unit-test
+  #[ true ] #[ 'foo symbol? ] unit-test
   #[ false ] #[ :foo symbol? ] unit-test
   #[ true ] #[ (fn [] 42) function? ] unit-test
   #[ false ] #[ :foo function? ] unit-test
