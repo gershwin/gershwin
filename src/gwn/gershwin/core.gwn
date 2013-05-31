@@ -108,7 +108,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 (defn
   gershwin-version
   "Returns Gershwin version as a printable string."
-  {:added "0.2.0"}
+  {:added "gershwin-0.2.0"}
   []
   (str (:major *gershwin-version*)
        "."
@@ -136,7 +136,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 (defn gershwin-eval
   "Evaluates the form data structure (not text!) and either places it on the data stack or invokes it (if it is a word or quotation)."
-  {:added "0.2.0"}
+  {:added "gershwin-0.2.0"}
   [form]
   (if *gershwin-eval*
     (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForm form))))
@@ -201,7 +201,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
   [x -- ?] (ap nil?) .
 
-: ^{:added "0.2.0" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
+: ^{:added "gershwin-0.2.0" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   meta
   [x -- y]
   (ap meta) .

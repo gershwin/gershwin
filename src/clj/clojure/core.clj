@@ -5302,7 +5302,7 @@
 
 (defmacro refer-gershwin
   "Same as (refer 'clojure.core <filters>)"
-  {:added "0.2.0"}
+  {:added "gershwin-0.2.0"}
   [& filters]
   `(clojure.core/refer '~'gershwin.core ~@filters))
 
@@ -5556,6 +5556,7 @@
 
 (defn require-words
   "Like 'require, but does Gershwin name-munging of symbols that are referenced via :refer."
+  {:added "gershwin-0.2.0"}
   [& args]
   (apply load-libs :require :require-words args))
 
