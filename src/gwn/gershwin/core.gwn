@@ -639,6 +639,15 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : sorted-set-by4 [a b c d comparator -- set] (ap 5 sorted-set-by) .
 
+: list* "Short-cut for nested consing."
+  [x -- l] (ap list*) .
+
+: list*2 [x coll -- l] (pop-n-swap list*) .
+
+: list*3 [x y coll -- l] (pop-n-swap2 list*) .
+
+: list*4 [x y z coll -- l] (pop-n-swap3 list*) .
+
 : peek [vector -- x] (ap peek) .
 
 : assoc [v k coll -- coll] (ap 3 assoc) .
