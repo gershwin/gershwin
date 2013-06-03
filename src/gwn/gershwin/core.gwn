@@ -79,6 +79,10 @@
   "x y z --> z y x and pass it that way to a Clojure function."
   [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
 
+(defn pop-n-swap3
+  "w x y z --> z y x w and pass it that way to a Clojure function."
+  [a-fn] (let [[z y x w] [(pop-it) (pop-it) (pop-it) (pop-it)]] (a-fn w x y z)))
+
 ;; ## Gershwin & Clojure Versions ##
 
 (let [properties (with-open [version-stream (.getResourceAsStream
@@ -229,6 +233,24 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x -- ?]
   (ap symbol?) .
 
+: keyword? [x -- ?] (ap keyword?) .
+
+: symbol [x -- sym] (ap symbol) .
+
+: symbol-with-ns [name ns] (ap 2 symbol) .
+
+: gensym [-- sym] (gensym) .
+
+: gensym-with-prefix [prefix -- sym] (ap gensym) .
+
+: keyword [x -- sym] (ap keyword) .
+
+: keyword-with-ns [name ns] (ap 2 keyword) .
+
+: find-keyword [kw -- kw-or-nil] (ap find-keyword) .
+
+: find-keyword-with-ns [kw ns -- kw-or-nil] (ap 2 find-keyword) .
+
 : function? "True if TOS is a fn"
   [x -- ?]
   (ap fn?) .
@@ -363,6 +385,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : true? [? -- ?] (ap true?) .
 
 : false? [? -- ?] (ap false?) .
+
+: not [obj -- ?] "Returns true if x is logical false, false otherwise." (ap not) .
 
 ;; ## Dataflow Combinators ##
 
@@ -521,17 +545,101 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : aget [idx java-array -- x] (ap 2 aget) .
 
+: aclone "Clone the Java array on TOS."
+  [arr -- arr]
+  (ap aclone) .
+
 : first [coll -- x] (ap first) .
 
-: second [coll -- x] (ap second) .
+: next [coll -- x] (ap next) .
 
-: last [coll -- x] (ap last) .
-
-: peek [vector -- x] (ap peek) .
+: rest [coll -- coll] (ap rest) .
 
 : conj [x coll -- coll] (ap 2 conj) .
 
 : cons [x coll -- coll] (pop-n-swap cons) .
+
+: second [coll -- x] (ap second) .
+
+: ffirst [coll -- x] (ap ffirst) .
+
+: nfirst [coll -- x] (ap nfirst) .
+
+: fnext [coll -- coll] (ap fnext) .
+
+: nnext [coll -- coll] (ap nnext) .
+
+: seq [coll -- seq] (ap seq) .
+
+: instance? [obj -- ?] (ap instance?) .
+
+: seq? [obj -- ?] (ap seq?) .
+
+: char? [obj -- ?] (ap char?) .
+
+: string? [obj -- ?] (ap string?) .
+
+: map? [obj -- ?] (ap map?) .
+
+: vector? [obj -- ?] (ap vector?) .
+
+: last [coll -- x] (ap last) .
+
+: butlast [coll -- coll] (ap butlast) .
+
+: cast [obj class -- obj] (ap 2 cast) .
+
+: to-array [coll -- array] (ap to-array) .
+
+: vector [a -- v] (ap vector) .
+
+: vector2 [a b -- v] (pop-n-swap vector) .
+
+: vector3 [a b c -- v] (pop-n-swap2 vector) .
+
+: vector4 [a b c d -- v] (pop-n-swap3 vector) .
+
+: vec [coll -- v] (ap vec) .
+
+: hash-map [v k -- m] (ap 2 hash-map) .
+
+: hash-map2 [v1 k1 v2 k2 -- m] (ap 4 hash-map) .
+
+: hash-set [a -- set] (ap hash-set) .
+
+: hash-set2 [a b -- set] (ap 2 hash-set) .
+
+: hash-set3 [a b c -- set] (ap 3 hash-set) .
+
+: hash-set4 [a b c d -- set] (ap 4 hash-set) .
+
+: sorted-map [v k -- m] (ap 2 sorted-map) .
+
+: sorted-map2 [v1 k1 v2 k2 -- m] (ap 4 sorted-map) .
+
+: sorted-map-by "For now, the comparator is a Clojure function. PersistentTreeMap expects a Comparator, which clojure.lang.AFunction already implements."
+  [v k comparator -- m] (ap 3 sorted-map-by) .
+
+: sorted-map-by2 [v1 k1 v2 k2 comparator -- m] (ap 5 sorted-map-by) .
+
+: sorted-set [a -- set] (ap sorted-set) .
+
+: sorted-set2 [a b -- set] (ap 2 sorted-set) .
+
+: sorted-set3 [a b c -- set] (ap 3 sorted-set) .
+
+: sorted-set4 [a b c d -- set] (ap 4 sorted-set) .
+
+: sorted-set-by "For now, the comparator is a Clojure function. PersistentTreeSet expects a Comparator, which clojure.lang.AFunction already implements."
+  [a comparator -- set] (ap 2 sorted-set-by) .
+
+: sorted-set-by2 [a b comparator -- set] (ap 3 sorted-set-by) .
+
+: sorted-set-by3 [a b c comparator -- set] (ap 4 sorted-set-by) .
+
+: sorted-set-by4 [a b c d comparator -- set] (ap 5 sorted-set-by) .
+
+: peek [vector -- x] (ap peek) .
 
 : assoc [v k coll -- coll] (ap 3 assoc) .
 
