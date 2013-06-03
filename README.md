@@ -1,5 +1,7 @@
 # Gershwin Programming Language #
 
+[![Build Status](http://173.255.237.17:8998/jenkins/buildStatus/icon?job=gershwin)](http://173.255.237.17:8998/jenkins/job/gershwin/)
+
 Gershwin is a stack-based, concatenative programming language with a Clojure runtime that targets the JVM. It features a fusion of Clojure data structures, namespaces and concurrency semantics with an API inspired by the Factor concatenative programming language. With seamless Clojure interop, Gershwin can leverage all the power and reach of the Clojure/JVM ecosystem while also providing the unique features of stack-based, concatenative languages: composition by code concatenation, point-free expressions, data-flow combinators, and simple, powerful code factoring.
 
 As an extension to Clojure, all legal Clojure code is legal Gershwin code. Gershwin changes to the Clojure reader, compiler, and public API are primarily additive and, as such, should not create compatibility conflicts with existing Clojure code bases. Please report any incompatibilities as bugs. The language versions of Gershwin and Clojure are both tracked in the Maven `pom.xml` file and available programmatically via the `gershwin-version` and `clojure-version` functions respectively.
