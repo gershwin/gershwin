@@ -5403,6 +5403,7 @@
               @*loaded-libs*))))
 
 (defn- gershwin-refer-filter-opts
+  "TODO Support `:refer :all`"
   [opts]
   (if-let [refers (:refer opts)]
     (assoc opts :refer (for [sym refers]
