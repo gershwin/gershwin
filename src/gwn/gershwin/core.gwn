@@ -201,8 +201,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
   [x -- ?] (ap nil?) .
 
-: ^{:added "gershwin-0.2.0" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
-  meta
+: meta "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"
   [x -- y]
   (ap meta) .
 
@@ -213,6 +212,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : class "Get an item's class"
   [x -- y]
   (ap class) .
+
+: with-meta
+  [meta obj -- obj]
+  (ap 2 with-meta) .
 
 : ancestors "Put immediate and indirect parents of item on TOS."
   [x -- coll]
@@ -504,6 +507,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : even? "Returns true if the value on TOS is an even integer." [n -- ?] (ap even?) .
 
+: zero? "Returns true if the value on TOS is zero." [n -- ?] (ap zero?) .
+
 ;; ### Equality ###
 
 : = [x x -- ?] (ap 2 =) .
@@ -697,8 +702,6 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [s -- r]
   (ap re-pattern) .
 
-(comment
-  ;; When working at nREPL, pending better integration
-  (set! *gershwin-eval* true)
-  (set! *print-stack* true)
-  )
+: with-out-str "Invokes the given quotation, binding *out* to a fresh StringWriter and puting its String value on TOS."
+  [quot -- s]
+  (with-out-str (.invoke (pop-it))) .
