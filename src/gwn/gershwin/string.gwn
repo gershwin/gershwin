@@ -1,4 +1,5 @@
 (ns gershwin.string
+  (:refer-gershwin :exclude [reverse])
   (:require [clojure.string :as string]))
 
 : reverse [s -- s] (ap string/reverse) .
