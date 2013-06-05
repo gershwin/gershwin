@@ -3852,6 +3852,35 @@
                             (str sym " does not exist")))))
             (. *ns* (refer (or (rename sym) sym) v)))))))
 
+;; TODO Probably have to handle name munging both ways.
+(defn refer-words
+  "Name munging. See also require-words."
+  {:added "gershwin-0.2.0"}
+  [ns-sym & filters]
+  (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
+        fs (apply hash-map filters)
+        nspublics (ns-publics ns)
+        rename (or (:rename fs) {})
+        exclude (set (:exclude fs))
+        to-do (if (= :all (:refer fs))
+                (keys nspublics)
+                (or (:refer fs) (:only fs) (keys nspublics)))]
+    (when (and to-do (not (instance? clojure.lang.Sequential to-do)))
+      (throw (new Exception ":only/:refer value must be a sequential collection of symbols")))
+    (doseq [sym to-do]
+      (when-not (or (exclude sym)
+                    (and (.endsWith (str sym) clojure.lang.RT/GERSHWIN_SUFFIX)
+                         (exclude (symbol (.substring (str sym)
+                                                      0
+                                                      (- (count (str sym)) 7))))))
+        (let [v (nspublics sym)]
+          (when-not v
+            (throw (new java.lang.IllegalAccessError
+                        (if (get (ns-interns ns) sym)
+                          (str sym " is not public")
+                          (str sym " does not exist")))))
+          (. *ns* (refer (or (rename sym) sym) v)))))))
+
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
   {:added "1.0"
@@ -5304,7 +5333,7 @@
   "Same as (refer 'clojure.core <filters>)"
   {:added "gershwin-0.2.0"}
   [& filters]
-  `(clojure.core/refer '~'gershwin.core ~@filters))
+  `(clojure.core/refer-words '~'gershwin.core ~@filters))
 
 (defmacro defonce
   "defs name to have the root value of the expr iff the named var has no root value,
