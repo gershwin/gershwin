@@ -510,11 +510,20 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : + "Return the sum of the top two items on TOS."
   [n n -- n] (ap 2 +) .
 
+: +' "Return the sum of the top two items on TOS. Supports arbitrary precision."
+  [n n -- n] (ap 2 +') .
+
 : - "Return the difference of the top two items on TOS."
   [n n -- n] (pop-n-swap -) .
 
+: -' "Return the difference of the top two items on TOS. Supports arbitrary precision."
+  [n n -- n] (pop-n-swap -') .
+
 : * "Return the product of the top two items on TOS."
   [n n -- n] (ap 2 *) .
+
+: *' "Return the product of the top two items on TOS. Support arbitrary precision."
+  [n n -- n] (ap 2 *') .
 
 : div "Return the quotient of the top two items on TOS."
   [n n -- n] (pop-n-swap /) .
@@ -527,11 +536,59 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : >= "Returns true if a is greater than or equal to b." [a b -- ?] (pop-n-swap >=) .
 
+: inc "Increment number on TOS by one."
+  [n -- n] (ap inc) .
+
+: inc' "Increment number on TOS by one. Supports arbitrary precision."
+  [n -- n] (ap inc') .
+
+: dec "Decrement number on TOS by one."
+  [n -- n] (ap dec) .
+
+: dec' "Decrement number on TOS by one. Supports arbitrary precision."
+  [n -- n] (ap dec') .
+
+: unchecked-inc-int [n -- n] (ap unchecked-inc-int) .
+: unchecked-inc [n -- n] (ap unchecked-inc) .
+: unchecked-dec-int [n -- n] (ap unchecked-dec-int) .
+: unchecked-dec [n -- n] (ap unchecked-dec) .
+: unchecked-negate-int [n -- n] (ap unchecked-negate-int) .
+: unchecked-negate [n -- n] (ap unchecked-negate) .
+: unchecked-add-int [a b -- n] (ap 2 unchecked-add-int) .
+: unchecked-add [a b -- n] (ap 2 unchecked-add) .
+: unchecked-subtract-int [a b -- n] (pop-n-swap unchecked-subtract-int) .
+: unchecked-subtract [a b -- n] (pop-n-swap unchecked-subtract) .
+: unchecked-multiply-int [a b -- n] (ap 2 unchecked-multiply-int) .
+: unchecked-multiply [a b -- n] (ap 2 unchecked-multiply) .
+: unchecked-divide-int [a b -- n] (pop-n-swap unchecked-divide-int) .
+: unchecked-remainder-int [a b -- n] (pop-n-swap unchecked-remainder-int) .
+
+;; Renamed to full 'quotient' to avoid any confusion with Gershwin quotations
+: quotient [num div -- n] (pop-n-swap quot) .
+
+: rem [num div -- n] (pop-n-swap rem) .
+
+: rationalize [n -- n] (ap rationalize) .
+
+: pos? [n -- ?] (ap pos?) .
+
+: neg? [n -- ?] (ap neg?) .
+
+: zero? "Returns true if the value on TOS is zero." [n -- ?] (ap zero?) .
+
+: max "Returns the greatest of the two nums on TOS."
+  [a b -- n] (ap 2 max) .
+
+: min "Returns the least of the two nums on TOS."
+  [a b -- n] (ap 2 min) .
+
 : odd? "Returns true if the value on TOS is an odd integer." [n -- ?] (ap odd?) .
 
 : even? "Returns true if the value on TOS is an even integer." [n -- ?] (ap even?) .
 
-: zero? "Returns true if the value on TOS is zero." [n -- ?] (ap zero?) .
+;; ### Bit operations ###
+
+: bit-not [x -- x] (ap bit-not) .
 
 ;; ### Equality ###
 
@@ -570,6 +627,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : nnext [coll -- coll] (ap nnext) .
 
 : seq [coll -- seq] (ap seq) .
+
+: reverse [coll -- coll] (ap reverse) .
 
 : instance? [obj -- ?] (ap instance?) .
 
