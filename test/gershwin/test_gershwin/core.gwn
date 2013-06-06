@@ -29,6 +29,24 @@
   #[ true ] #[ 3 3 - zero? ] unit-test
   #[ false ] #[ 3 3 + zero? ] unit-test
 
+  ;; Bit-wise operations
+  #[ 0 ] #[ 0 0 bit-and ] unit-test
+  #[ 0 ] #[ 0 1 bit-and ] unit-test
+  #[ 0 ] #[ 1 0 bit-and ] unit-test
+  #[ 1 ] #[ 1 1 bit-and ] unit-test
+  #[ 0 ] #[ 0 0 bit-or ] unit-test
+  #[ 1 ] #[ 0 1 bit-or ] unit-test
+  #[ 1 ] #[ 1 0 bit-or ] unit-test
+  #[ 1 ] #[ 1 1 bit-or ] unit-test
+  #[ 0 ] #[ 0 0 bit-xor ] unit-test
+  #[ 1 ] #[ 0 1 bit-xor ] unit-test
+  #[ 1 ] #[ 1 0 bit-xor ] unit-test
+  #[ 0 ] #[ 1 1 bit-xor ] unit-test
+  ;; 1011 => 0011
+  #[ 3 ] #[ 3 2r1011 bit-clear ] unit-test
+  ;; 1011 => 1010
+  #[ 10 ] #[ 0 2r1011 bit-clear] unit-test
+
   ;; Equality
   #[ true ] #[ (Object.) dup = ] unit-test
   #[ true ] #[ "foo" "foo" = ] unit-test

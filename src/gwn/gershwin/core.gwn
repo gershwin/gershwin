@@ -586,9 +586,31 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : even? "Returns true if the value on TOS is an even integer." [n -- ?] (ap even?) .
 
+: integer? [n -- ?] (ap integer?) .
+
 ;; ### Bit operations ###
 
-: bit-not [x -- x] (ap bit-not) .
+: bit-not [x -- n] (ap bit-not) .
+
+: bit-and [x y -- n] (pop-n-swap bit-and) .
+
+: bit-or [x y -- n] (pop-n-swap bit-or) .
+
+: bit-xor [x y -- n] (pop-n-swap bit-xor) .
+
+: bit-and-not [x y -- n] (pop-n-swap bit-and-not) .
+
+: bit-clear [idx x -- n] (ap 2 bit-clear) .
+
+: bit-set [idx x -- n] (ap 2 bit-set) .
+
+: bit-flip [idx x -- n] (ap 2 bit-flip) .
+
+: bit-test [idx x -- n] (ap 2 bit-test) .
+
+: bit-shift-left [n x -- n] (ap 2 bit-shift-left) .
+
+: bit-shift-right [n x -- n] (ap 2 bit-shift-right) .
 
 ;; ### Equality ###
 
