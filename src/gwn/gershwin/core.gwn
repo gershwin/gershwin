@@ -255,6 +255,68 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x -- ?]
   (ap fn?) .
 
+: num "Coerce to number" [x -- n] (ap num) .
+
+: long "Coerce to long" [x -- l] (ap long) .
+
+: float "Coerce to float" [x -- f] (ap float) .
+
+: double "Coerce to double" [x -- d] (ap double) .
+
+: short "Coerce to short" [x -- sh] (ap short) .
+
+: byte "Coerce to byte" [x -- b] (ap byte) .
+
+: char "Coerce to char" [x -- ch] (ap char) .
+
+: unchecked-byte "Coerce to byte. Subject to rounding or truncation."
+  [x -- b]
+  (ap unchecked-byte) .
+
+: unchecked-short "Coerce to short. Subject to rounding or truncation."
+  [x -- sh]
+  (ap unchecked-short) .
+
+: unchecked-char "Coerce to char. Subject to rounding or truncation."
+  [x -- ch]
+  (ap unchecked-char) .
+
+: unchecked-int "Coerce to int. Subject to rounding or truncation."
+  [x -- i]
+  (ap unchecked-int) .
+
+: unchecked-long "Coerce to long. Subject to rounding or truncation."
+  [x -- l]
+  (ap unchecked-long) .
+
+: unchecked-float "Coerce to float. Subject to rounding or truncation."
+  [x -- f]
+  (ap unchecked-float) .
+
+: unchecked-double "Coerce to double. Subject to rounding or truncation."
+  [x -- d]
+  (ap unchecked-double) .
+
+: number? [x -- ?] (ap number?) .
+
+: mod [num div -- modulus] (pop-n-swap mod) .
+
+: ratio? [x -- ?] (ap ratio?) .
+
+: numerator [r -- n] (ap numerator) .
+
+: denominator [r -- n] (ap denominator) .
+
+: decimal? [x -- ?] (ap decimal?) .
+
+: float? [x -- ?] (ap float?) .
+
+: rational? [x -- ?] (ap rational?) .
+
+: bigint "Coerce to BigInteger" [x -- bn] (ap bigint) .
+
+: bigdec "Coerce to BigDecimal" [x -- bd] (ap bigdec) .
+
 ;; ### Shuffle Words ###
 
 ;; The basic shuffle words are drop, swap, dup, and rot
