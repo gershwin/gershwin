@@ -674,6 +674,12 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : bit-shift-right [n x -- n] (ap 2 bit-shift-right) .
 
+;;
+
+;; complement, constantly
+
+: identity [x -- x] (st-peek) .
+
 ;; ### Equality ###
 
 : = [x x -- ?] (ap 2 =) .
@@ -681,6 +687,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : == [n n -- ?] (ap 2 ==) .
 
 ;; ### Sequences, Collections ###
+
+: perst-peek [coll] (ap peek) .
+
+: perst-pop [coll] (ap pop) .
 
 : get [key m -- x] (ap 2 get) .
 
@@ -742,11 +752,15 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : vector4 [a b c d -- v] (pop-n-swap3 vector) .
 
+: vector* [xs -- v] (ap vec) .
+
 : vec [coll -- v] (ap vec) .
 
 : hash-map [v k -- m] (ap 2 hash-map) .
 
 : hash-map2 [v1 k1 v2 k2 -- m] (ap 4 hash-map) .
+
+: hash-map* [vks -- m] (apply hash-map (pop-it)) .
 
 : hash-set [a -- set] (ap hash-set) .
 
@@ -756,14 +770,20 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : hash-set4 [a b c d -- set] (ap 4 hash-set) .
 
+: hash-set* [xs -- set] (apply hash-set (pop-it)) .
+
 : sorted-map [v k -- m] (ap 2 sorted-map) .
 
 : sorted-map2 [v1 k1 v2 k2 -- m] (ap 4 sorted-map) .
+
+: sorted-map* [vks -- m] (apply sorted-map (pop-it)) .
 
 : sorted-map-by "For now, the comparator is a Clojure function. PersistentTreeMap expects a Comparator, which clojure.lang.AFunction already implements."
   [v k comparator -- m] (ap 3 sorted-map-by) .
 
 : sorted-map-by2 [v1 k1 v2 k2 comparator -- m] (ap 5 sorted-map-by) .
+
+: sorted-map-by* [vks comparator -- m] (apply sorted-map-by (pop-it) (pop-it)) .
 
 : sorted-set [a -- set] (ap sorted-set) .
 
@@ -773,6 +793,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : sorted-set4 [a b c d -- set] (ap 4 sorted-set) .
 
+: sorted-set* [xs -- set] (apply sorted-set (pop-it)) .
+
 : sorted-set-by "For now, the comparator is a Clojure function. PersistentTreeSet expects a Comparator, which clojure.lang.AFunction already implements."
   [a comparator -- set] (ap 2 sorted-set-by) .
 
@@ -781,6 +803,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : sorted-set-by3 [a b c comparator -- set] (ap 4 sorted-set-by) .
 
 : sorted-set-by4 [a b c d comparator -- set] (ap 5 sorted-set-by) .
+
+: sorted-set-by* [xs comparator -- set] (apply sorted-set-by (pop-it) (pop-it)) .
 
 : list* "Short-cut for nested consing."
   [x -- l] (ap list*) .
@@ -796,6 +820,18 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : assoc [v k coll -- coll] (ap 3 assoc) .
 
 : dissoc [k coll -- coll] (ap 2 dissoc) .
+
+: dissoc-keys [ks coll -- coll]
+  (let [coll (pop-it)
+        ks (pop-it)]
+    (apply dissoc coll ks)) .
+
+: disj [k set -- set] (ap 2 disj) .
+
+: disj-keys [ks set -- set]
+  (let [set (pop-it)
+        ks (pop-it)]
+    (apply disj set ks)) .
 
 : keys [coll -- coll] (ap keys) .
 
