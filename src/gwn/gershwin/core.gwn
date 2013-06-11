@@ -903,6 +903,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : sorted-map-by* [vks comparator -- m] (apply sorted-map-by (pop-it) (pop-it)) .
 
+: set [coll -- set] (ap set) .
+
 : sorted-set [a -- set] (ap sorted-set) .
 
 : sorted-set2 [a b -- set] (ap 2 sorted-set) .
