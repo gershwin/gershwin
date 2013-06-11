@@ -266,6 +266,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [s -- obj]
   (ap read-string) .
 
+: load-reader [rdr -- obj] (ap load-reader) .
+
+: load-string [s -- obj] (ap load-string) .
+
 : nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
   [x -- ?] (ap nil?) .
 
