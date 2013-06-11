@@ -28,6 +28,14 @@
   (let [gershwin-sym (-> sym name (str clojure.lang.RT/GERSHWIN_SUFFIX) symbol)]
     `(var ~gershwin-sym)))
 
+(defmacro time-took
+  "Like Clojure's `time`, but returns a map with two keys, :time with the time in milliseconds and :result with the return value of the expression."
+  [expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (hash-map :time (/ (double (- (. System (nanoTime)) start#)) 1000000.0)
+               :result ret#)))
+
 ;; ## Stack Manipulation ##
 
 (defn stack-clear
