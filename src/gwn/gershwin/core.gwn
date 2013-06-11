@@ -762,11 +762,53 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : get [key m -- x] (ap 2 get) .
 
-: aget [idx java-array -- x] (ap 2 aget) .
+: alength [arr -- n] (ap alength) .
 
 : aclone "Clone the Java array on TOS."
   [arr -- arr]
   (ap aclone) .
+
+: aget [idx java-array -- x] (ap 2 aget) .
+
+: aset [val idx arr -- arr] (ap 3 aset) .
+
+: aset-int [int idx arr -- arr] (ap 3 aset-int) .
+
+: aset-long [long idx arr -- arr] (ap 3 aset-long) .
+
+: aset-boolean [boolean idx arr -- arr] (ap 3 aset-boolean) .
+
+: aset-float [float idx arr -- arr] (ap 3 aset-float) .
+
+: aset-double [double idx arr -- arr] (ap 3 aset-double) .
+
+: aset-short [short idx arr -- arr] (ap 3 aset-short) .
+
+: aset-byte [byte idx arr -- arr] (ap 3 aset-byte) .
+
+: aset-char [char idx arr -- arr] (ap 3 aset-char) .
+
+: make-array [length type -- arr] (ap 2 make-array) .
+
+;; TODO Add helpers for multidimensional arrays
+
+: to-array-2d [coll -- arr] (ap to-array-2d) .
+
+: macroexpand-1 [form -- form] (ap macroexpand-1) .
+
+: macroexpand [form -- form] (ap macroexpand) .
+
+: create-struct [k -- struct] (ap create-struct) .
+
+: create-struct2 [k1 k2 -- struct] (ap 2 create-struct) .
+
+: create-struct3 [k1 k2 k3 -- struct] (ap 3 create-struct) .
+
+: create-struct4 [k1 k2 k3 k4 -- struct] (ap 4 create-struct) .
+
+: create-struct* [ks -- struct] (apply create-struct (pop-it)) .
+
+;; TODO Rest of struct handling here.
 
 : first [coll -- x] (ap first) .
 
