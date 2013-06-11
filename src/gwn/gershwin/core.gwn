@@ -776,6 +776,14 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : vec [coll -- v] (ap vec) .
 
+: subvec-from "Creates subvector from start index to end of vector."
+  [start v -- v] (ap 2 subvec) .
+
+: subvec "Creates a subvector from start (inclusive) to end (exclusive)."
+  [start end v -- v]
+  (let [[v end start] [(pop-it) (pop-it) (pop-it)]]
+    (subvec v start end)) .
+
 : hash-map [v k -- m] (ap 2 hash-map) .
 
 : hash-map2 [v1 k1 v2 k2 -- m] (ap 4 hash-map) .
