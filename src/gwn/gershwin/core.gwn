@@ -207,6 +207,42 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [ns --]
   (stack-void (ap in-ns)) .
 
+: find-ns [sym -- ns] (ap find-ns) .
+
+: create-ns [sym -- ns] (ap create-ns) .
+
+;; TODO Guard Gershwin the same way Clojure is guarded.
+: remove-ns [sym --] (ap remove-ns) .
+
+: all-ns [-- nss] (all-ns) .
+
+: the-ns "If passed a namespace, returns it. Else, when passed a symbol, returns the namespace named by it, throwing an exception if not found."
+  [x -- ns]
+  (ap the-ns) .
+
+: ns-name [ns -- name-as-sym] (ap ns-name) .
+
+: ns-map [ns -- mappings] (ap ns-map) .
+
+: ns-unmap [sym ns -- mappings] (ap 2 ns-unmap) .
+
+: ns-publics [ns -- mappings] (ap ns-publics) .
+
+: ns-imports [ns -- import-mappings] (ap ns-imports) .
+
+: ns-interns [ns -- intern-mappings] (ap ns-interns) .
+
+;; TODO Consider refer and other namespace setup mechanisms, since they're primarily
+;;      used and exposed via the ns macro.
+
+: ns-refers [ns -- refer-mappings] (ap ns-refers) .
+
+: alias [alias namespace-sym --] (pop-n-swap alias) .
+
+: ns-aliases [ns -- alias-mappins] (ap ns-aliases) .
+
+: ns-unalias [alias ns --] (ap 2 ns-unalias) .
+
 : pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) .
 
 : newline [] (stack-void (newline)) .
