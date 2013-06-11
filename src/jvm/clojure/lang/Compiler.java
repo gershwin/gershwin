@@ -690,18 +690,7 @@ static class DefExpr implements Expr{
             boolean handled = false;
             // TODO Consider necessity and whether or not name munged var
             //   needs support as well.
-            if(o instanceof Var) {
-                Var aVar = (Var) o;
-                IPersistentMap varMeta = aVar.meta();
-                if(varMeta != null && varMeta.containsKey(wordKey)) {
-                    // This is a Gershwin word, it's definition is already wrapped.
-                    if(RT.booleanCast(varMeta.valAt(wordKey))) {
-                        // System.out.println("Direct Gershwin Word var");
-                        wrappedForms = RT.conj(wrappedForms, withInvoke(o));
-                        handled = true;
-                    }
-                }
-            } else if(o instanceof Symbol) {
+            if(o instanceof Symbol) {
                 // System.out.println("MUNGE WORD SYMBOL: " + o);
                 Symbol aSym = (Symbol) o;
                 Symbol maybeVarSym = Symbol.intern(aSym.toString() + RT.GERSHWIN_SUFFIX);
