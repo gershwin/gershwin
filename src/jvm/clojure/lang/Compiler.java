@@ -677,6 +677,16 @@ static class DefExpr implements Expr{
         }
     }
 
+    private static boolean resolvesToWord(Object maybeVar) {
+        boolean isWord = false;
+        if(maybeVar != null && maybeVar instanceof Var) {
+            Var aVar = (Var) maybeVar;
+            IPersistentMap aVarMeta = aVar.meta();
+            if(aVarMeta != null && aVarMeta.containsKey(wordKey))
+                isWord = RT.booleanCast(aVarMeta.valAt(wordKey));
+        }
+        return isWord;
+    }
 
     public static IPersistentCollection wrapGershwinForm(Object form) {
         return wrapGershwinForms(new PersistentList(form));
@@ -688,30 +698,20 @@ static class DefExpr implements Expr{
             Object o = s.first();
             // System.out.println("Raw form to wrap: " + o);
             boolean handled = false;
-            // TODO Consider necessity and whether or not name munged var
-            //   needs support as well.
             if(o instanceof Symbol) {
                 // System.out.println("MUNGE WORD SYMBOL: " + o);
-                Symbol aSym = (Symbol) o;
-                Symbol maybeVarSym = Symbol.intern(aSym.toString() + RT.GERSHWIN_SUFFIX);
-                // System.out.println("Maybe it's this Gershwin word.... ? " + maybeVarSym);
-                Object maybeVar = maybeResolveIn((Namespace) RT.CURRENT_NS.deref(), maybeVarSym);
-                if(maybeVar != null && maybeVar instanceof Var) {
-                    // System.out.println("MUNGE is Var: " + maybeVar);
-                    Var bVar = (Var) maybeVar;
-                    IPersistentMap bVarMeta = bVar.meta();
-                    // System.out.println("MUNGE Var metadata is: " + bVarMeta);
-                    if(bVarMeta != null && bVarMeta.containsKey(wordKey)) {
-                        // System.out.println("MUNGE Var is Word: " + bVarMeta);
-                        // This is a Gershwin word, it's definition is already wrapped.
-                        if(RT.booleanCast(bVarMeta.valAt(wordKey))) {
-                            // System.out.println("Name-munged Gershwin Word var: " + bVar);
-                            wrappedForms = RT.conj(wrappedForms, withInvoke(bVar));
-                            handled = true;
-                        }
-                    }
-                    // if(bVar.isBound()) {
-                    // }
+                Namespace currentNs = (Namespace) RT.CURRENT_NS.deref();
+                Symbol cljSym = (Symbol) o;
+                Symbol gwnSym = Symbol.intern(cljSym.toString() + RT.GERSHWIN_SUFFIX);
+                // System.out.println("Maybe it's this Gershwin word.... ? " + gwnSym);
+                Object maybeGwnVar = maybeResolveIn(currentNs, gwnSym);
+                Object maybeCljVar = maybeResolveIn(currentNs, cljSym);
+                if(resolvesToWord(maybeGwnVar)) {
+                    wrappedForms = RT.conj(wrappedForms, withInvoke(maybeGwnVar));
+                    handled = true;
+                } else if(resolvesToWord(maybeCljVar)) {
+                    wrappedForms = RT.conj(wrappedForms, withInvoke(maybeCljVar));
+                    handled = true;
                 }
             }
             // Put it on the stack by default.
