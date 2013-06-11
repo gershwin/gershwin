@@ -201,11 +201,26 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) .
 
+: newline [] (stack-void (newline)) .
+
+: flush [] (stack-void (flush)) .
+
 : prn "Print TOS plus a newline in a way that can be re-read by Clojure." [n --] (stack-void (ap prn)) .
 
 : print "Print TOS in a human-readable fashion." [n --] (stack-void (ap print)) .
 
 : println "Print TOS plus a newline in a human-readable fashion." [n --] (stack-void (ap println)) .
+
+: read "Read the next object from stream. Currently defaults to Clojure's default extra arguments to read, namely that EOF is an error, the EOF value is `nil`, and reading is not recursive."
+  [stream -- obj]
+  (read (pop-it) true nil false) .
+
+: read-line "Reads the next line from stream that is the current value of `*in*` as a String (uses readLine() method of reader for `*in*`)."
+  [] (read-line) .
+
+: read-string "Reads one object from the string `s`."
+  [s -- obj]
+  (ap read-string) .
 
 : nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
   [x -- ?] (ap nil?) .
