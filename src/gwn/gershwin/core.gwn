@@ -201,6 +201,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x y invocable -- ...]
   (pop-n-swap (pop-it)) .
 
+: call [x invocable -- ...] apply .
+: call2 [y x invocable -- ...] apply2 .
+: call3 [z y x invocable -- ...] apply3 .
+: call-swap [x y invocable -- ...] apply-swap .
+
 ;; ### Namespaces ###
 
 : in-ns "Change to the specific namespace, creating it if needed."
