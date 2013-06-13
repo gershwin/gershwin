@@ -1191,3 +1191,37 @@ If the collection is empty, returns nil. If the collection contains only one ite
 : with-out-str "Invokes the given quotation, binding *out* to a fresh StringWriter and puting its String value on TOS."
   [quot -- s]
   (with-out-str (.invoke (pop-it))) .
+
+;; ### Threads and company ###
+
+: delay [quot -- delay-obj]
+  (let [quotation (pop-it)]
+    (delay (do
+             (.invoke quotation)
+             (pop-it)))) .
+
+: delay? [maybe-delay -- ?] (ap delay?) .
+
+: force [x -- value-of-delay-or-x] (ap force) .
+
+: locking [quot x -- ...] (locking (pop-it) (.invoke (pop-it))) .
+
+: deref "Dereference the item on TOS and put its underlying value on TOS."
+  [derefferable -- val]
+  (ap deref) .
+
+(comment
+  ;; Multimethod Example
+  (defmulti greeting (fn [x] (x :lang)))
+
+  (defmethod greeting "English" [_] (with-gershwin "Howdy!"))
+  (defmethod greeting "French" [_] (with-gershwin "Bonjour!"))
+  (defmethod greeting "German" [_] (with-gershwin "Guten Tag!"))
+
+  ;; Interactive session:
+  ;;
+  ;; user=> {:lang "English"} greeting call
+  ;; -- Data Stack:
+  ;; "Howdy!"
+
+  )
