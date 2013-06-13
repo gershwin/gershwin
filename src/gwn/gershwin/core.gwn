@@ -1017,6 +1017,18 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
     (.invoke quot)
     (assoc-in coll keys (pop-it))) .
 
+: concat [coll coll -- lazy-seq] (pop-n-swap concat) .
+
+: concat0 [-- lazy-seq] (concat) .
+
+: concat1 [coll -- lazy-seq] (ap 1 concat) .
+
+: concat3 [coll coll coll -- lazy-seq] (pop-n-swap2 concat) .
+
+: concat4 [coll coll coll -- lazy-seq] (pop-n-swap3 concat) .
+
+: concat* [coll-of-colls -- lazy-seq] (apply concat (pop-it)) .
+
 : nth [n coll -- x] (ap 2 nth) .
 
 : count [coll -- n] (ap count) .
