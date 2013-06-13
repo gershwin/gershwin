@@ -1174,6 +1174,16 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [s s s -- s]
   (pop-n-swap2 str) .
 
+: substring
+  [start end s -- s]
+  (let [[s end start] [(pop-it) (pop-it) (pop-it)]]
+    (subs s start end)) .
+
+: substring-from
+  [start s -- s]
+  (let [[s start] [(pop-it) (pop-it)]]
+    (subs s start)).
+
 : re-pattern "Given a String, put a java.util.Pattern object on TOS. Note that you need to double-escape things per Java's Pattern requirements."
   [s -- r]
   (ap re-pattern) .
