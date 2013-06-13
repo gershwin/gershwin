@@ -991,9 +991,19 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
         ks (pop-it)]
     (apply disj set ks)) .
 
+: find [key m -- entry-or-nil] (ap 2 find) .
+
+: select-keys [ks m -- m] (ap 2 select-keys) .
+
 : keys [coll -- coll] (ap keys) .
 
 : values [coll -- coll] (ap vals) .
+
+: key [map-entry -- k] (ap key) .
+
+: val [map-entry -- val] (ap val) .
+
+: rseq [reversible -- reversed] (ap rseq) .
 
 : get-in [keys m -- x]
   (ap 2 get-in) .
