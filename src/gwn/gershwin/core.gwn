@@ -298,6 +298,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x -- coll]
   (ap ancestors) .
 
+: name [x -- s] (ap name) .
+
+: namespace [s-or-kw -- ns-s] (ap namespace) .
+
 : symbol "Coerce TOS to a symbol"
   [x -- y]
   (ap symbol) .
