@@ -780,11 +780,17 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : identity [x -- x] (st-peek) .
 
-;; ### Equality ###
+: identical? [x y -- ?] (ap 2 identical?) .
 
-: = [x x -- ?] (ap 2 =) .
+;; ### Equality, Comparison ###
+
+: = [x y -- ?] (ap 2 =) .
+
+: not= [x y -- ?] (ap 2 not=) .
 
 : == [n n -- ?] (ap 2 ==) .
+
+: compare [x y -- n] (pop-n-swap compare) .
 
 ;; ### Sequences, Collections ###
 
