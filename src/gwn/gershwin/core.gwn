@@ -527,6 +527,29 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : not [obj -- ?] "Returns true if x is logical false, false otherwise." (ap not) .
 
+: complement [quot -- quot-opposite] not .
+
+: cond
+  [clauses]
+  (let [clauses (pop-it)]
+    (when-not (even? (count clauses))
+      (throw (IllegalArgumentException. "You must pass an even number of forms to cond.")))
+    (loop [clauses clauses]
+      (if-not (seq clauses)
+        nil
+        (let [condition (do
+                          ;; Invoke predicate quotation
+                          (.invoke (first clauses))
+                          ;; Get truthy/falsey value
+                          (pop-it))
+              action (second clauses)]
+          (if condition
+            (stack-void (.invoke action))
+            ;; Eliminate unnecessary explicit
+            ;; grouping of quotation pairs.
+            (recur (nnext clauses))))))) .
+
+
 ;; ## Dataflow Combinators ##
 
 ;; #### Preservering combinators ####
