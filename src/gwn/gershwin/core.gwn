@@ -1217,6 +1217,10 @@ If the collection is empty, returns nil. If the collection contains only one ite
   (let [[s start] [(pop-it) (pop-it)]]
     (subs s start)).
 
+: starts-with? [substring s -- ?] (.startsWith (pop-it) (pop-it)) .
+
+: ends-with? [substring s -- ?] (.endsWith (pop-it) (pop-it)) .
+
 : re-pattern "Given a String, put a java.util.Pattern object on TOS. Note that you need to double-escape things per Java's Pattern requirements."
   [s -- r]
   (ap re-pattern) .
