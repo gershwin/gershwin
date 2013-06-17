@@ -52,6 +52,8 @@
 (def print-stack stack-print)
 (def ps stack-print)
 
+: print-stack [] (stack-void (stack-print)) .
+
 (defn st-peek [] (GershwinStack/peek))
 
 (defn peek* [coll]
