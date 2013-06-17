@@ -1202,6 +1202,11 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [s s s -- s]
   (pop-n-swap2 str) .
 
+: str* "Same as (apply str TOS)."
+  [coll-of-s -- s]
+  ;; (apply str (pop-it))
+  #[ str2 ] reduce .
+
 : substring
   [start end s -- s]
   (let [[s end start] [(pop-it) (pop-it) (pop-it)]]
