@@ -1045,6 +1045,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : concat* [coll-of-colls -- lazy-seq] (apply concat (pop-it)) .
 
+: sort [coll -- coll] (ap sort) .
+
 : nth [n coll -- x] (ap 2 nth) .
 
 : count [coll -- n] (ap count) .
