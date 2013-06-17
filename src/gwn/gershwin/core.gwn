@@ -1178,6 +1178,16 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [coll n -- coll]
   (ap 2 take) .
 
+: each "Call quotation with each item in coll put on TOS. Equivalent of Clojure's doseq."
+  [coll quot -- ...]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (doseq [x coll]
+      (conj-it x)
+      (.invoke quot))) .
+
+: doseq [coll quot -- ...] each .
+
 ;; ### String & Regular Expressions ###
 
 : str "Stringify the given item on TOS."
