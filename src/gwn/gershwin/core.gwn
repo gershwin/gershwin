@@ -1247,6 +1247,28 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [derefferable -- val]
   (ap deref) .
 
+;; ### Multimethods ###
+
+: remove-all-methods [multifn --] (ap remove-all-methods) .
+
+: remove-method [dispatch-val multifn --] (ap 2 remove-method) .
+
+: prefer-method [dispatch-val-x dispatch-val-y multifn --]
+  (let [[multifn dy dx] [(pop-it) (pop-it) (pop-it)]]
+    (prefer-method multifn dx dy)) .
+
+: methods [multifn -- m] (ap methods) .
+
+: get-method [dispatch-val multifn -- method] (ap 2 get-method) .
+
+: prefers [multifn -- m] (ap prefers) .
+
+;; ### Core IO ###
+
+: slurp [f -- s] (ap slurp) .
+
+: spit [content f --] (ap 2 spit) .
+
 (comment
   ;; Multimethod Example
   (defmulti greeting (fn [x] (x :lang)))
