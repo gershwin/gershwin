@@ -906,6 +906,20 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : vec [coll -- v] (ap vec) .
 
+: wrap "Given a quotation that, when invoked, will leave an arbitrary number of items on the top of the stack, create a sequence out of those items."
+  [quot -- coll]
+  (let [quot (pop-it)
+        marker (gensym)]
+    (conj-it marker)
+    (.invoke quot)
+    (let [sub-stack (take-while #(not= % marker)
+                                (reverse (clojure.lang.GershwinStack/seq)))]
+      ;; inc to include the gensym
+      (dotimes [_ (inc (count sub-stack))] (pop-it))
+      (reverse sub-stack))) .
+
+: wrap-vec [quot -- v] wrap vec .
+
 : subvec-from "Creates subvector from start index to end of vector."
   [start v -- v] (ap 2 subvec) .
 
