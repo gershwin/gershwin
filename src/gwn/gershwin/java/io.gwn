@@ -1,0 +1,6 @@
+(ns gershwin.java.io
+  (:require [clojure.java.io :as io]))
+
+: resource [name -- resource] (ap io/resource) .
+
+: reader [x -- rdr] (ap io/reader) .

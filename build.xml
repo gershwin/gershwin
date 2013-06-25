@@ -92,6 +92,7 @@
       <arg value="gershwin.main"/>
       <arg value="gershwin.string"/>
       <arg value="gershwin.test"/>
+      <arg value="gershwin.java.io"/>
     </java>
   </target>
 
