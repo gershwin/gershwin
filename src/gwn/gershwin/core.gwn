@@ -1236,9 +1236,21 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [s -- r]
   (ap re-pattern) .
 
+: re-seq [s re -- seq] (ap 2 re-seq) .
+
 : with-out-str "Invokes the given quotation, binding *out* to a fresh StringWriter and puting its String value on TOS."
   [quot -- s]
   (with-out-str (.invoke (pop-it))) .
+
+: with-open
+  [quot reader]
+  (stack-void
+   (let [[rdr quot] (pop-n 2)]
+     (with-open [rdr rdr]
+       (conj-it rdr)
+       (.invoke quot)))) .
+
+: line-seq [rdr -- seq] (ap line-seq) .
 
 ;; ### Threads and company ###
 
