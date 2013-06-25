@@ -72,6 +72,12 @@
   []
   (GershwinStack/popIt))
 
+(defn pop-n
+  [n]
+  "Remove n items from TOS and return as seq. Mutable"
+  (for [x (range n)]
+    (pop-it)))
+
 (defn conj-it
   "Conj the item onto the data stack. Mutable."
   [x] (GershwinStack/conjMutable x))
@@ -83,15 +89,21 @@
 
 (defn pop-n-swap
   "Remove top two items from TOS, swap, then apply the function."
-  [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a)))
+  [a-fn]
+  (let [[b a] (pop-n 2)]
+    (a-fn a b)))
 
 (defn pop-n-swap2
   "x y z --> z y x and pass it that way to a Clojure function."
-  [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
+  [a-fn]
+  (let [[z y x] (pop-n 3)]
+    (a-fn x y z)))
 
 (defn pop-n-swap3
   "w x y z --> z y x w and pass it that way to a Clojure function."
-  [a-fn] (let [[z y x w] [(pop-it) (pop-it) (pop-it) (pop-it)]] (a-fn w x y z)))
+  [a-fn]
+  (let [[z y x w] (pop-n 4)]
+    (a-fn w x y z)))
 
 ;; ## Gershwin & Clojure Versions ##
 
@@ -410,8 +422,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : swap "Swaps the two items on TOS."
   [x y -- y x]
-  (let [y (pop-it)
-        x (pop-it)]
+  (let [[y x] (pop-n 2)]
     (conj-it y) x) .
 
 : dup "Duplicate the TOS."
@@ -420,9 +431,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : rot "Rotate the items on TOS as shown in stack effect. Factor docs note this as deprecated, but it's still used in the definition of core words."
   [x y z -- y z x]
-  (let [z (pop-it)
-        y (pop-it)
-        x (pop-it)]
+  (let [[z y x] (pop-n 3)]
     (conj-it y) (conj-it z) x) .
 
 ;; ### Factor Extensions to Shuffle Words ###
@@ -484,9 +493,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : if
   "The boolean 'if'. Expects both a \"then\" and an \"else\" quotation."
   [? then else -- ...]
-  (let [else-quot (pop-it)
-        then-quot (pop-it)
-        condition (pop-it)]
+  (let [[else-quot then-quot condition] (pop-n 3)]
     (if condition
       (stack-void (.invoke then-quot))
       (stack-void (.invoke else-quot)))) .
@@ -558,8 +565,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : dip "Remove second item from TOS, execute the quotation on TOS, then restore second item on TOS."
   [x quot -- x]
-  (let [quot (pop-it)
-        x (pop-it)]
+  (let [[quot x] (pop-n 2)]
     (.invoke quot)
     x) .
 
@@ -925,7 +931,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : subvec "Creates a subvector from start (inclusive) to end (exclusive)."
   [start end v -- v]
-  (let [[v end start] [(pop-it) (pop-it) (pop-it)]]
+  (let [[v end start] (pop-n 3)]
     (subvec v start end)) .
 
 : hash-map [v k -- m] (ap 2 hash-map) .
@@ -996,15 +1002,13 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : dissoc [k coll -- coll] (ap 2 dissoc) .
 
 : dissoc-keys [ks coll -- coll]
-  (let [coll (pop-it)
-        ks (pop-it)]
+  (let [[coll ks] (pop-n 2)]
     (apply dissoc coll ks)) .
 
 : disj [k set -- set] (ap 2 disj) .
 
 : disj-keys [ks set -- set]
-  (let [set (pop-it)
-        ks (pop-it)]
+  (let [[set ks] (pop-n 2)]
     (apply disj set ks)) .
 
 : find [key m -- entry-or-nil] (ap 2 find) .
@@ -1026,9 +1030,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 ;; Arg order like assoc ?
 : update-in [quot keys coll]
-  (let [coll (pop-it)
-        keys (pop-it)
-        quot (pop-it)]
+  (let [[coll keys quot] (pop-n 3)]
     (conj-it (get-in coll keys))
     (.invoke quot)
     (assoc-in coll keys (pop-it))) .
@@ -1061,8 +1063,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : some "Puts the first truthy value generated from invoking the given quotation for each item in the collection, else puts nil on TOS."
   [coll quot]
-  (let [quot (pop-it)
-        coll (pop-it)]
+  (let [[quot coll] (pop-n 2)]
     (loop [coll coll]
       (if (seq coll)
         (do
@@ -1083,8 +1084,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
   [coll quot -- coll]
-  (let [quot (pop-it)
-        coll (pop-it)]
+  (let [[quot coll] (pop-n 2)]
     (lazy-seq
      (loop [coll coll final []]
        (if (seq coll)
@@ -1098,8 +1098,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 If the collection is empty, returns nil. If the collection contains only one item, that item is put on TOS and the quotation is not invoked."
   [coll quot -- coll]
-  (let [quot (pop-it)
-        coll (pop-it)]
+  (let [[quot coll] (pop-n 2)]
     (cond
      (empty? coll) nil
 
@@ -1121,9 +1120,7 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : reduce-with "Like reduce, but begins the reduction by invoking the quotation using the specified \"accumulator\" and the first item from the collection, instead of the first two items from the collection like `reduce` does."
   [coll acc quot -- coll]
-  (let [quot (pop-it)
-        acc  (pop-it)
-        coll (pop-it)]
+  (let [[quot acc coll] (pop-n 3)]
     (cond
      (empty? coll) nil
 
@@ -1146,8 +1143,7 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : filter "Replace the collection with one including only those items that return truthy for the given predicate quotation."
   [coll pred-quot -- coll]
-  (let [quot (pop-it)
-        coll (pop-it)]
+  (let [[quot coll] (pop-n 2)]
     (lazy-seq
      (loop [coll coll final []]
        (if (seq coll)
@@ -1161,8 +1157,7 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : remove "Opposite of filter. Replace collection with one including only those items that return falsey for the given predicate."
   [coll pred-quot -- coll]
-  (let [quot (pop-it)
-        coll (pop-it)]
+  (let [[quot coll] (pop-n 2)]
     (lazy-seq
      (loop [coll coll final []]
        (if (seq coll)
@@ -1180,8 +1175,7 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : each "Call quotation with each item in coll put on TOS. Equivalent of Clojure's doseq."
   [coll quot -- ...]
-  (let [quot (pop-it)
-        coll (pop-it)]
+  (let [[quot coll] (pop-n 2)]
     (doseq [x coll]
       (conj-it x)
       (.invoke quot))) .
@@ -1207,14 +1201,31 @@ If the collection is empty, returns nil. If the collection contains only one ite
   ;; (apply str (pop-it))
   #[ str2 ] reduce .
 
+: format [token s -- s] (ap 2 format) .
+
+: format2 [token-a token-b s -- s]
+  (let [s (pop-it)
+        [token-b token-a] (pop-n 2)]
+    (format s token-a token-b)) .
+
+: format3 [token-a token-b token-c s -- s]
+  (let [s (pop-it)
+        [token-c token-b token-a] (pop-n 3)]
+    (format s token-a token-b token-c)) .
+
+: format* [tokens-coll s -- s]
+  (let [s (pop-it)
+        tokens (pop-it)]
+    (apply (partial format s) tokens)) .
+
 : substring
   [start end s -- s]
-  (let [[s end start] [(pop-it) (pop-it) (pop-it)]]
+  (let [[s end start] (pop-n 3)]
     (subs s start end)) .
 
 : substring-from
   [start s -- s]
-  (let [[s start] [(pop-it) (pop-it)]]
+  (let [[s start] (pop-n 2)]
     (subs s start)).
 
 : starts-with? [substring s -- ?] (.startsWith (pop-it) (pop-it)) .
@@ -1254,7 +1265,7 @@ If the collection is empty, returns nil. If the collection contains only one ite
 : remove-method [dispatch-val multifn --] (ap 2 remove-method) .
 
 : prefer-method [dispatch-val-x dispatch-val-y multifn --]
-  (let [[multifn dy dx] [(pop-it) (pop-it) (pop-it)]]
+  (let [[multifn dy dx] (pop-n 3)]
     (prefer-method multifn dx dy)) .
 
 : methods [multifn -- m] (ap methods) .
