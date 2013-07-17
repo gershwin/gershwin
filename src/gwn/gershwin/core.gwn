@@ -472,6 +472,14 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
         x (peek* cddr)]
     (conj-it x) (conj-it y) z) .
 
+: dup4 "Duplicate top four items on TOS."
+  [w x y z -- w x y z w x y z]
+  (stack-void
+   (let [top-4 (pop-n 4)]
+     (dotimes [_ 2]
+       (doseq [a (reverse top-4)]
+         (conj-it a))))) .
+
 : over "Duplicate second item on TOS."
   [x y -- x y x]
   (peek* (st-pop)) .
@@ -597,6 +605,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [..a x y z quot ( ..a x y z -- ..b ) -- ..b x y z]
   #[ dup3 ] dip dip3 .
 
+: keep4 "Like keep, but restores first, second, third, and fourth items on TOS after invoking quotation with them."
+  [..a w x y z quot ( ..a w x y z -- ..b ) -- ..b w x y z]
+  #[ dup4 ] dip dip4 .
+
 ;; #### Cleave combinators ####
 
 ;; Cleave operators mean: take a single piece of data and apply n number of quotations to it. These are common patterns for repeated uses of `keep`, which should be evident from their implementation.
@@ -613,7 +625,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x y z p q --]
   #[ keep3 ] dip invoke .
 
-: tri "Invoke the three quotations on TOS sequentially with the third item on TOS present for all invocations."
+: tri "Invoke the three quotations on TOS sequentially with the fourth item on TOS present for all invocations."
   [x p q r --]
   #[ #[ keep ] dip keep ] dip invoke .
 
@@ -624,6 +636,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : tri3 "Same as tri, but work with three pieces of data."
   [x y z p q r --]
   #[ #[ keep3 ] dip keep3 ] dip invoke .
+
+: quad "Invoke the four quotations on TOS sequentially with the fifth item on TOS present for all invocations."
+  [datum q1 q2 q3 q4]
+  #[ #[ keep4 ] dip keep4 ] dip invoke .
 
 ;; NOTE: The `cleave` word requires words we haven't implemented yet. Punting til later.
 
