@@ -1197,6 +1197,32 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : doseq [coll quot -- ...] each .
 
+: repeat [x -- coll] (ap repeat) .
+
+: repeatedly [quot -- coll] (let [quot (pop-it)]
+                              (repeatedly (fn [] (.invoke quot)))) .
+
+: iterate [x quot -- coll] (let [[quot x] (pop-n 2)]
+                             (lazy-seq
+                              (iterate (fn [x]
+                                         (conj-it x)
+                                         (.invoke quot)
+                                         (pop-it)) x))) .
+
+: range [start end -- coll] (pop-n-swap range) .
+
+: range-to "Zero to end"
+  [end -- coll]
+  (ap range) .
+
+: distinct [coll -- coll] (ap distinct) .
+
+: cycle [coll] (ap cycle) .
+
+: interleave [coll1 coll2 -- coll] (pop-n-swap interleave) .
+
+: interpose [coll sep -- coll] (ap 2 interpose) .
+
 ;; ### String & Regular Expressions ###
 
 : str "Stringify the given item on TOS."
