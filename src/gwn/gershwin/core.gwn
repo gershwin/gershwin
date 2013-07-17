@@ -880,7 +880,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : reverse [coll -- coll] (ap reverse) .
 
-: instance? [obj -- ?] (ap instance?) .
+: instance? [obj klass -- ?] (ap 2 instance?) .
 
 : seq? [obj -- ?] (ap seq?) .
 
