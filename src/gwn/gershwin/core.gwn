@@ -1171,6 +1171,19 @@ If the collection is empty, returns nil. If the collection contains only one ite
              (recur (rest coll) final)))
          final)))) .
 
+: mapcat
+  [coll quot]
+  (let [[quot coll] (pop-n 2)
+        mapped (lazy-seq
+                (loop [coll coll final []]
+                  (if (seq coll)
+                    (do
+                      (conj-it (first coll))
+                      (.invoke quot)
+                      (recur (rest coll) (conj final (pop-it))))
+                    final)))]
+    (apply concat mapped)) .
+
 : take "Put a lazy collection on TOS that consists of the first n items from the original collection."
   [coll n -- coll]
   (ap 2 take) .
