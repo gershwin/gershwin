@@ -4,3 +4,11 @@
 : resource [name -- resource] (ap io/resource) .
 
 : reader [x -- rdr] (ap io/reader) .
+
+: as-file [x -- file] (ap io/as-file) .
+
+: copy [input output --] (pop-n-swap io/copy) .
+
+: copy+ [opts input output]
+  (let [[output input opts] (pop-n 3)]
+    (io/copy input output opts)) .
