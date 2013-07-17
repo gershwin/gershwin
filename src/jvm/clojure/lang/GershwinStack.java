@@ -96,6 +96,14 @@ public class GershwinStack {
         return rawStack.seq();
     }
 
+    /**
+     * Return the raw, underlying stack used for the implementation
+     * of this class.
+     */
+    public static IPersistentStack getStack() {
+        return (IPersistentStack) stackAtom.deref();
+    }
+
     public static class StackUnderflowException extends IllegalStateException {
         public StackUnderflowException() {
             super();
