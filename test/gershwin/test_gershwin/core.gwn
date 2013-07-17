@@ -100,6 +100,10 @@
   #[ "no" ] #[ false #[ "no" ] when-not ] unit-test
   #[ false ] #[ nil nil or ] unit-test
 
+  ;; Shuffle Words
+  #[ [2 1] ] #[ 1 #[ inc ] keep vector2 ] unit-test
+  #[ [1 3 1 2] ] #[ 1 2 #[ inc ] keep2 vector4 ] unit-test
+
   ;; Collections
   #[ :foo ] #[ 1 [:bar :foo :baz] nth ] unit-test
   #[ 42 ] #[ "foo" {"foo" 42} get ] unit-test
