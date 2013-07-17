@@ -1,0 +1,9 @@
+(ns gershwin.edn
+  (:refer-gershwin :exclude [read read-string])
+  (:require [clojure.edn :as edn]))
+
+: read [stream -- obj] (ap edn/read) .
+
+: read+ [opts stream -- obj] (pop-n-swap edn/read) .
+
+: read-string [string -- obj] (ap edn/read-string) .

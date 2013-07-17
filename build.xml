@@ -89,6 +89,7 @@
           fork="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>
       <arg value="gershwin.core"/>
+      <arg value="gershwin.edn"/>
       <arg value="gershwin.main"/>
       <arg value="gershwin.string"/>
       <arg value="gershwin.test"/>
