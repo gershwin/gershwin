@@ -22,6 +22,10 @@
   #[ #[ invoke ] bi& ] when
   = swap conj .
 
+: exit-on-fail "Cause the JVM process to exit if a test suite fails."
+  [suite-result]
+  :fail = #[ (System/exit 1) ] when .
+
 : run-suite
   "Wrap a ste of unit tests as necessary to run them and collect results."
   [quot -- ?]
