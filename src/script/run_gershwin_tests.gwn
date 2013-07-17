@@ -8,6 +8,7 @@
 "Core Suite:" println
 #[ core-test/suite ] run-suite
 exit-on-fail
+"" println
 
 "String Suite:" println
 #[ string-test/suite ] run-suite
