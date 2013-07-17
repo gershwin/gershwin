@@ -1019,6 +1019,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : values [coll -- coll] (ap vals) .
 
+: vals [coll -- coll] values .
+
 : key [map-entry -- k] (ap key) .
 
 : val [map-entry -- val] (ap val) .
