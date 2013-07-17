@@ -1273,11 +1273,19 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : ends-with? [substring s -- ?] (.endsWith (pop-it) (pop-it)) .
 
+: index-of [substring string -- idx] (.indexOf (pop-it) (pop-it)) .
+
+: last-index-of [substring string -- idx] (.lastIndexOf (pop-it) (pop-it)) .
+
 : re-pattern "Given a String, put a java.util.Pattern object on TOS. Note that you need to double-escape things per Java's Pattern requirements."
   [s -- r]
   (ap re-pattern) .
 
 : re-seq [s re -- seq] (ap 2 re-seq) .
+
+: re-find
+  [str patt -- match]
+  (ap 2 re-find) .
 
 : with-out-str "Invokes the given quotation, binding *out* to a fresh StringWriter and puting its String value on TOS."
   [quot -- s]
