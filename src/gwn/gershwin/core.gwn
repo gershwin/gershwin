@@ -639,7 +639,15 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : quad "Invoke the four quotations on TOS sequentially with the fifth item on TOS present for all invocations."
   [datum q1 q2 q3 q4]
-  #[ #[ keep4 ] dip keep4 ] dip invoke .
+  #[ #[ #[ keep ] dip keep ] dip keep ] dip invoke .
+
+: quad2
+  [datum1 datum2 q1 q2 q3 q4]
+  #[ #[ #[ keep2 ] dip keep2 ] dip keep2 ] dip invoke .
+
+: quad3
+  [datum1 datum2 datum3 q1 q2 q3 q4]
+  #[ #[ #[ keep3 ] dip keep3 ] dip keep3 ] dip invoke .
 
 ;; NOTE: The `cleave` word requires words we haven't implemented yet. Punting til later.
 
