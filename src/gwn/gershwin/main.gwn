@@ -124,7 +124,7 @@
           (doseq [item (clojure.lang.GershwinStack/seq)]
             (cond
              (instance? clojure.lang.LazySeq item)
-             (println "(...LazySeq...)")
+             (println (str "(...LazySeq " (gensym "gwn") "...)"))
 
              ;; For possible future print exceptions
 
