@@ -908,6 +908,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : seq? [obj -- ?] (ap seq?) .
 
+: coll? [obj -- ?] (ap coll?) .
+
 : char? [obj -- ?] (ap char?) .
 
 : string? [obj -- ?] (ap string?) .
