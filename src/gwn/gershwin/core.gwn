@@ -1321,6 +1321,10 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : last-index-of [substring string -- idx] (.lastIndexOf (pop-it) (pop-it)) .
 
+: to-upper-case [s -- s] #(.toUpperCase %) apply .
+
+: to-lower-case [s -- s] #(.toLowerCase %) apply .
+
 : re-pattern "Given a String, put a java.util.Pattern object on TOS. Note that you need to double-escape things per Java's Pattern requirements."
   [s -- r]
   (ap re-pattern) .
