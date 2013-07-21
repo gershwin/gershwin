@@ -164,9 +164,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   "Evaluates the form data structure (not text!) and either places it on the data stack or invokes it (if it is a word or quotation)."
   {:added "gershwin-0.2.0"}
   [form]
-  (if *gershwin-eval*
-    (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForm form))))
-    (. clojure.lang.Compiler (eval form))))
+  ;; if *gershwin-eval*
+  (. clojure.lang.Compiler (eval (. clojure.lang.Compiler (wrapGershwinForm form)))))
 
 (def ^{:private true
        :doc "Shorter name for easier typing of `gershwin-eval` at REPL, specifically nREPL for which Gershwin integration has not yet been written."}
