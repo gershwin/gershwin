@@ -54,7 +54,7 @@
 
 : print-stack [] (stack-void (stack-print)) .
 
-(defn st-peek [] (GershwinStack/peek))
+(defn peek-safe [] (GershwinStack/peekSafe))
 
 (defn peek* [coll]
   "Like Clojure's peek, but throws an exception if the stack is empty."
@@ -427,7 +427,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : dup "Duplicate the TOS."
   [x -- x x]
-  (st-peek) .
+  (peek-safe) .
 
 : rot "Rotate the items on TOS as shown in stack effect. Factor docs note this as deprecated, but it's still used in the definition of core words."
   [x y z -- y z x]
@@ -459,7 +459,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : dup2 "Duplicate top two items on TOS."
   [x y -- x y x y]
-  (let [y (st-peek)
+  (let [y (peek-safe)
         x (peek* (st-pop))]
     (conj-it x) y) .
 
@@ -467,7 +467,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x y z -- x y z x y z]
   (let [cdr (st-pop)
         cddr (pop cdr)
-        z (st-peek)
+        z (peek-safe)
         y (peek* cdr)
         x (peek* cddr)]
     (conj-it x) (conj-it y) z) .
@@ -810,7 +810,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 ;; complement, constantly
 
-: identity [x -- x] (st-peek) .
+: identity [x -- x] (peek-safe) .
 
 : identical? [x y -- ?] (ap 2 identical?) .
 

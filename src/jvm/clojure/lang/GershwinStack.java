@@ -38,10 +38,15 @@ public class GershwinStack {
     /**
      * Like Clojure's peek, but throws an exception if the stack is empty.
      */
-    public static Object peek() {
+    public static Object peekSafe() {
         IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
         if (rawStack.count() == 0)
             throw new StackUnderflowException(STACK_UNDERFLOW_MSG);
+        return rawStack.peek();
+    }
+
+    public static Object peek() {
+        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
         return rawStack.peek();
     }
 
