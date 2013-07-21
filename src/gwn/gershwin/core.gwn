@@ -531,6 +531,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x y -- ?]
   over ? .
 
+(declare-word dip)
+: and-greedy "Evalutes quot1, short-circuits and returns false if it evaluates to falsey. Else it tries quot2, returning its return value."
+  [quot1 quot2 -- ?]
+  swap dip swap #[ drop invoke ] #[ drop2 false ] if* .
+
 : boolean [x -- ?] #[ true ] #[ false ] if .
 
 (declare-word dupd)
