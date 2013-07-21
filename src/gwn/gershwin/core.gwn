@@ -1214,10 +1214,11 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : each "Call quotation with each item in coll put on TOS. Equivalent of Clojure's doseq."
   [coll quot -- ...]
-  (let [[quot coll] (pop-n 2)]
-    (doseq [x coll]
-      (conj-it x)
-      (.invoke quot))) .
+  (stack-void
+   (let [[quot coll] (pop-n 2)]
+     (doseq [x coll]
+       (conj-it x)
+       (.invoke quot)))) .
 
 : doseq [coll quot -- ...] each .
 
