@@ -1100,6 +1100,19 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
             (recur (rest coll))))
         nil))) .
 
+: every? "Do all items in coll return truthy for quot?"
+  [coll quot]
+  (let [[quot coll] (pop-n 2)]
+    (loop [coll coll]
+      (if (seq coll)
+        (do
+          (conj-it (first coll))
+          (.invoke quot)
+          (if-not (pop-it)
+            false
+            (recur (rest coll))))
+        true))) .
+
 : has-any? "Same as member?, but expects a collection of items to check for instead of a single one."
   [subcoll coll -- item-or-nil]
   swap clojure.core/set apply clojure.core/some apply2 .
