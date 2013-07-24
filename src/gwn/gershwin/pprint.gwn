@@ -1,0 +1,6 @@
+(ns gershwin.pprint
+  (:require [clojure.pprint :as pprint]))
+
+: pp [--] (stack-void (pprint/pp)) .
+
+: pprint [x --] (stack-void (ap pprint/pprint)) .

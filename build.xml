@@ -91,6 +91,7 @@
       <arg value="gershwin.core"/>
       <arg value="gershwin.edn"/>
       <arg value="gershwin.main"/>
+      <arg value="gershwin.pprint"/>
       <arg value="gershwin.string"/>
       <arg value="gershwin.test"/>
       <arg value="gershwin.java.io"/>
