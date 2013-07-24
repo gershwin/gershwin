@@ -5432,11 +5432,13 @@
               @*loaded-libs*))))
 
 (defn- gershwin-refer-filter-opts
-  "TODO Support `:refer :all`"
+  "For options passed to :refer, munge Gershwin word names when appropriate."
   [opts]
   (if-let [refers (:refer opts)]
-    (assoc opts :refer (for [sym refers]
-                         (symbol (str sym clojure.lang.RT/GERSHWIN_SUFFIX))))
+    (assoc opts :refer (if (= refers :all)
+                         :all
+                         (for [sym refers]
+                           (symbol (str sym clojure.lang.RT/GERSHWIN_SUFFIX)))))
     opts))
 
 (defn- load-lib
