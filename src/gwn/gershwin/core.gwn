@@ -290,6 +290,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : load-file [name -- obj] (ap load-file) .
 
+: load-gershwin-file "Like load-file, but passes in extra options to trigger Gershwin evaluation."
+  [name -- obj]
+  #(stack-void
+    (clojure.lang.Compiler/loadFile % true)) apply .
+
 : nil? "Returns true if the value on TOS is the value `nil`. You do not need to use this if you are just checking for a truthy/falsey value, as both `nil` and `false` represent falsey values for the purposes of Gershwin/Clojure booleans."
   [x -- ?] (ap nil?) .
 
