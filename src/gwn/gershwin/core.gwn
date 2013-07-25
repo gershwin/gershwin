@@ -1369,6 +1369,10 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [derefferable -- val]
   (ap deref) .
 
+: sleep "Sleep the current thread for n milliseconds."
+  [n --]
+  #(Thread/sleep %) apply .
+
 ;; ### Multimethods ###
 
 : remove-all-methods [multifn --] (ap remove-all-methods) .
