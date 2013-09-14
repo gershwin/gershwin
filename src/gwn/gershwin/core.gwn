@@ -1152,6 +1152,16 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
            (recur (rest coll) (conj final (pop-it))))
          final)))) .
 
+: pmap "Invoke the quotation for each element in the collection in parallel, putting th nw collection of these results on TOS."
+  [coll quot -- coll]
+  (let [[quot coll] (pop-n 2)
+        parallel-fn (fn [item]
+                      (binding [*gershwin-stack* (GershwinStack.)]
+                        (conj-it item)
+                        (.invoke quot)
+                        (pop-it)))]
+    (pmap parallel-fn coll)) .
+
 : reduce "Given a collection and a quotation that expects two items off the stack, calls the quotation with the first two items of the collection, followed by invoking the quotation using that result and subsequent items from the collection.
 
 If the collection is empty, returns nil. If the collection contains only one item, that item is put on TOS and the quotation is not invoked."
