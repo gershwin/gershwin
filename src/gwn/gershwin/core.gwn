@@ -2,6 +2,12 @@
   gershwin.core
   (:import [clojure.lang GershwinStack GershwinStack$StackUnderflowException]))
 
+;; The Stack
+
+(def ^{:doc "Data stack for this thread."
+       :dynamic true}
+  *gershwin-stack* (GershwinStack.))
+
 ;; ## Clojure Interop ## ;;
 
 (defmacro stack-void
@@ -41,12 +47,12 @@
 (defn stack-clear
   "Clear the data stack."
   []
-  (GershwinStack/clear))
+  (.clear *gershwin-stack*))
 
 (defn stack-print
   "Print the contents of the data stack as a seq."
   []
-  (prn (clojure.lang.GershwinStack/seq)))
+  (prn (.seq *gershwin-stack*)))
 
 (def clear-stack stack-clear)
 (def print-stack stack-print)
@@ -54,7 +60,7 @@
 
 : print-stack [] (stack-void (stack-print)) .
 
-(defn peek-safe [] (GershwinStack/peekSafe))
+(defn peek-safe [] (.peekSafe *gershwin-stack*))
 
 (defn peek* [coll]
   "Like Clojure's peek, but throws an exception if the stack is empty."
@@ -65,12 +71,12 @@
 (defn st-pop
   "Call GershwinStack's pop method. Immutable."
   []
-  (GershwinStack/pop))
+  (.pop *gershwin-stack*))
 
 (defn pop-it
   "Remove and return the item on TOS. Mutable."
   []
-  (GershwinStack/popIt))
+  (.popIt *gershwin-stack*))
 
 (defn pop-n
   [n]
@@ -80,7 +86,7 @@
 
 (defn conj-it
   "Conj the item onto the data stack. Mutable."
-  [x] (GershwinStack/conjMutable x))
+  [x] (.conjMutable *gershwin-stack* x))
 
 (defn ap
   "Apply the function to n number of items off TOS. Defaults to top item."
@@ -956,7 +962,7 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
     (conj-it marker)
     (.invoke quot)
     (let [sub-stack (take-while #(not= % marker)
-                                (reverse (clojure.lang.GershwinStack/seq)))]
+                                (reverse (.seq *gershwin-stack*)))]
       ;; inc to include the gensym
       (dotimes [_ (inc (count sub-stack))] (pop-it))
       (reverse sub-stack))) .

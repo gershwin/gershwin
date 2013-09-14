@@ -8,59 +8,60 @@ import clojure.api.API;
  * the Atom as needed. Method names suffixed with "Mutable" denote mutable versions
  * that affect the state of the Atom holding the stack.
  */
-public class GershwinStack {
-    private static Atom stackAtom = new Atom(PersistentVector.EMPTY);
+public class GershwinStack implements IPersistentStack {
+    private IPersistentStack stack = PersistentVector.EMPTY;
     private static IFn CLOJURE_CONJ = API.var("clojure.core", "conj");
     private static IFn CLOJURE_POP = API.var("clojure.core", "pop");
     private static String STACK_UNDERFLOW_MSG = "Data stack underflow. Can't take something off an empty data stack.";
 
-    public static IPersistentStack conj(Object form) {
-        return (IPersistentStack) CLOJURE_CONJ.invoke(stackAtom.deref(), form);
+    public GershwinStack() {}
+
+    public IPersistentStack conj(Object form) {
+        return (IPersistentStack) CLOJURE_CONJ.invoke(stack, form);
     }
 
-    public static IPersistentStack conjMutable(Object form) {
-        stackAtom.swap(CLOJURE_CONJ, form);
-        return (IPersistentStack) stackAtom.deref();
+    public IPersistentStack conjMutable(Object form) {
+        this.stack = (IPersistentStack) CLOJURE_CONJ.invoke(this.stack, form);
+        return this.stack;
     }
 
     /**
      * Custom mutable conj, never conjes the special value
      * :gershwin.core/stack-void
      */
-    public static IPersistentStack conjIt(Object form) {
+    public IPersistentStack conjIt(Object form) {
         if(form == null
            || !(form.equals(RT.STACK_VOID))) {
-            stackAtom.swap(CLOJURE_CONJ, form);
+            this.stack = (IPersistentStack) CLOJURE_CONJ.invoke(this.stack, form);
         }
-        return (IPersistentStack) stackAtom.deref();
+        return this.stack;
     }
 
     /**
      * Like Clojure's peek, but throws an exception if the stack is empty.
      */
-    public static Object peekSafe() {
-        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
-        if (rawStack.count() == 0)
+    public Object peekSafe() {
+        if (this.stack.count() == 0)
             throw new StackUnderflowException(STACK_UNDERFLOW_MSG);
-        return rawStack.peek();
+        return this.stack.peek();
     }
 
-    public static Object peek() {
-        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
-        return rawStack.peek();
+    public Object peek() {
+        return this.stack.peek();
     }
 
-    public static IPersistentStack pop() {
+    public IPersistentStack pop() {
         try {
-            return (IPersistentStack) CLOJURE_POP.invoke(stackAtom.deref());
+            return this.stack.pop();
         } catch(IllegalStateException e) {
             throw new StackUnderflowException(STACK_UNDERFLOW_MSG, e);
         }
     }
 
-    public static IPersistentStack popMutable() {
+    public IPersistentStack popMutable() {
         try {
-            return (IPersistentStack) stackAtom.swap(CLOJURE_POP);
+            this.stack = this.stack.pop();
+            return this.stack;
         } catch(IllegalStateException e) {
             throw new StackUnderflowException(STACK_UNDERFLOW_MSG);
         }
@@ -72,41 +73,43 @@ public class GershwinStack {
      * the Clojure idiom, which returns the remaining collection instead
      * of the item popped.
      */
-    public static Object popIt() {
-        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
-        Object item = rawStack.peek();
-        try {
-            // Try again if, between the above peek and the change to the atom,
-            // the underlying value has changed.
-            if(!stackAtom.compareAndSet(rawStack, rawStack.pop())) {
-                return popIt();
-            }
-        } catch(IllegalStateException e) {
-            throw new StackUnderflowException(STACK_UNDERFLOW_MSG);
-        }
+    public Object popIt() {
+        Object item = stack.peek();
+        popMutable();
         return item;
     }
 
-    public static IPersistentStack clear() {
-        return (IPersistentStack) stackAtom.reset(PersistentVector.EMPTY);
+    public IPersistentStack clear() {
+        this.stack = (IPersistentStack) PersistentVector.EMPTY;
+        return this.stack;
     }
 
-    public static int count() {
-        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
-        return rawStack.count();
+    public IPersistentCollection empty() {
+        return this.stack.empty();
     }
 
-    public static ISeq seq() {
-        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
-        return rawStack.seq();
+    public int count() {
+        return stack.count();
+    }
+
+    public ISeq seq() {
+        return stack.seq();
     }
 
     /**
      * Return the raw, underlying stack used for the implementation
      * of this class.
      */
-    public static IPersistentStack getStack() {
-        return (IPersistentStack) stackAtom.deref();
+    public IPersistentStack getStack() {
+        return this.stack;
+    }
+
+    public IPersistentCollection cons(Object o) {
+        return this.stack.cons(o);
+    }
+
+    public boolean equiv(Object o) {
+        return this.stack.equiv(o);
     }
 
     public static class StackUnderflowException extends IllegalStateException {

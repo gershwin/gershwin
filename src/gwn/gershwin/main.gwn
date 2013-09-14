@@ -98,6 +98,7 @@
              *print-level* *print-level*
              *print-stack* *print-stack*
              *gershwin-eval* *gershwin-eval*
+             *gershwin-stack* *gershwin-stack*
              *data-readers* *data-readers*
              *compile-path* (System/getProperty "clojure.compile.path" "classes")
              *command-line-args* *command-line-args*
@@ -121,7 +122,7 @@
           (prompt))
         (do
           (print "\n--- Data Stack:\n")
-          (doseq [item (clojure.lang.GershwinStack/seq)]
+          (doseq [item (.seq *gershwin-stack*)]
             (cond
              (instance? clojure.lang.LazySeq item)
              (println (str "(...LazySeq " (gensym "gwn") "...)"))

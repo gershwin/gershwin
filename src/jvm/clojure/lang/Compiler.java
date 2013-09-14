@@ -8644,10 +8644,9 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
      * to the stack.
      */
     private static ISeq withConjIt(Object rawForm) {
-        return withNil(RT.cons(DOT,
-                               RT.cons(Symbol.intern("clojure.lang.GershwinStack"),
-                                       RT.cons(RT.list(Symbol.intern("conjIt"), rawForm),
-                                               null))));
+        final Symbol theStack = Symbol.intern("gershwin.core", "*gershwin-stack*");
+        final Symbol conjIt = Symbol.intern("conjIt");
+        return withNil(RT.list(DOT, theStack, conjIt, rawForm));
     }
 
     private static ISeq withInvoke(Object rawForm) {
