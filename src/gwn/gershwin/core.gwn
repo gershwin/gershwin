@@ -279,6 +279,14 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : println "Print TOS plus a newline in a human-readable fashion." [n --] (stack-void (ap println)) .
 
+: pr-str [x -- s] (ap pr-str) .
+
+: prn-str [x -- s] (ap prn-str) .
+
+: print-str [x -- s] (ap print-str) .
+
+: println-str [x -- s] (ap println-str) .
+
 : read "Read the next object from stream. Currently defaults to Clojure's default extra arguments to read, namely that EOF is an error, the EOF value is `nil`, and reading is not recursive."
   [stream -- obj]
   (read (pop-it) true nil false) .
@@ -315,6 +323,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : class "Get an item's class"
   [x -- y]
   (ap class) .
+
+: class? [x -- ?] (ap class?) .
 
 : with-meta
   [meta obj -- obj]
@@ -358,7 +368,13 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   [x -- ?]
   (ap fn?) .
 
+: fn? [x -- ?] function? .
+
+: ifn? [x -- ?] (ap ifn?) .
+
 : num "Coerce to number" [x -- n] (ap num) .
+
+: int "Coerce to int" [x -- i] (ap int) .
 
 : long "Coerce to long" [x -- l] (ap long) .
 
@@ -799,6 +815,14 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : integer? [n -- ?] (ap integer?) .
 
+: rand [-- f] (rand) .
+
+: rand-n [n -- f] (ap rand) .
+
+: rand-int [n -- i] (ap rand-int) .
+
+: rand-nth [coll -- item] (ap rand-nth) .
+
 ;; ### Bit operations ###
 
 : bit-not [x -- n] (ap bit-not) .
@@ -840,6 +864,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : == [n n -- ?] (ap 2 ==) .
 
 : compare [x y -- n] (pop-n-swap compare) .
+
+: hash [x -- hash] (ap hash) .
 
 ;; ### Sequences, Collections ###
 
@@ -899,9 +925,13 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : first [coll -- x] (ap first) .
 
+: peek [stack -- x] (ap peek) .
+
 : next [coll -- x] (ap next) .
 
 : rest [coll -- coll] (ap rest) .
+
+: pop [stack -- coll] (ap pop) .
 
 : conj [x coll -- coll] (ap 2 conj) .
 
@@ -916,6 +946,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : fnext [coll -- coll] (ap fnext) .
 
 : nnext [coll -- coll] (ap nnext) .
+
+: nthnext [n coll -- coll] (ap 2 nthnext) .
+
+: nthrest [n coll -- coll] (ap 2 nthrest) .
 
 : seq [coll -- seq] (ap seq) .
 
@@ -954,6 +988,16 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : vector* [xs -- v] (ap vec) .
 
 : vec [coll -- v] (ap vec) .
+
+: list [a -- v] (ap list) .
+
+: list2 [a b -- v] (pop-n-swap list) .
+
+: list3 [a b c -- v] (pop-n-swap2 list) .
+
+: list4 [a b c d -- v] (pop-n-swap3 list) .
+
+: list* [xs -- v] (apply list (pop-it)) .
 
 : wrap "Given a quotation that, when invoked, will leave an arbitrary number of items on the top of the stack, create a sequence out of those items."
   [quot -- coll]
@@ -1038,9 +1082,21 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : list*4 [x y z coll -- l] (pop-n-swap3 list*) .
 
-: peek [vector -- x] (ap peek) .
+: into [from to -- coll] (ap 2 into) .
+
+: file-seq [dir -- seq] (ap file-seq) .
+
+: iterator-seq [iter -- seq] (ap iterator-seq) .
+
+: bean [x -- jb] (ap bean) .
+
+: associative? [x -- ?] (ap associative?) .
+
+: counted? [x -- ?] (ap counted?) .
 
 : assoc [v k coll -- coll] (ap 3 assoc) .
+
+: assoc-in [v ks coll -- coll] (ap 3 assoc-in) .
 
 : dissoc [k coll -- coll] (ap 2 dissoc) .
 
@@ -1053,6 +1109,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : disj-keys [ks set -- set]
   (let [[set ks] (pop-n 2)]
     (apply disj set ks)) .
+
+: empty [coll -- empty-coll] (ap empty) .
+
+: not-empty [coll -- nil-or-coll] (ap not-empty) .
 
 : find [key m -- entry-or-nil] (ap 2 find) .
 
@@ -1091,6 +1151,16 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : concat4 [coll coll coll -- lazy-seq] (pop-n-swap3 concat) .
 
 : concat* [coll-of-colls -- lazy-seq] (apply concat (pop-it)) .
+
+: merge [m2 m1 -- m] (ap 2 merge) .
+
+: merge2 [m3 m2 m1 -- m] (ap 3 merge) .
+
+: merge3 [m4 m3 m2 m1 -- m] (ap 4 merge) .
+
+: merge4 [m5 m4 m3 m2 m1 -- m] (ap 5 merge) .
+
+: merge* [ms -- m] (apply merge (pop-it)) .
 
 : sort [coll -- coll] (ap sort) .
 
@@ -1250,9 +1320,33 @@ If the collection is empty, returns nil. If the collection contains only one ite
                     final)))]
     (apply concat mapped)) .
 
+;; TODO cover all arities of parition, partition-all
+: partition [coll n -- coll] (ap 2 partition) .
+
 : take "Put a lazy collection on TOS that consists of the first n items from the original collection."
   [coll n -- coll]
   (ap 2 take) .
+
+: drop-last "Return all but last item in coll, put on TOS."
+  [coll -- coll]
+  (ap drop-last) .
+
+: drop-while "Return all items in coll, from beginning to end, stopping when the quotation evalutes to falsey."
+  [coll quot -- coll]
+  (let [[quot coll] (pop-n 2)]
+    (loop [coll coll final []]
+      (if-not (first coll)
+        final
+        (do
+          (conj-it (first coll))
+          (.invoke quot)
+          (if-not (pop-it)
+            final
+            (recur (rest coll) (conj final (first coll)))))))) .
+
+: flatten [coll -- coll] (ap flatten) .
+
+: frequencies [coll -- coll] (ap frequencies) .
 
 : each "Call quotation with each item in coll put on TOS. Equivalent of Clojure's doseq."
   [coll quot -- ...]
@@ -1263,6 +1357,16 @@ If the collection is empty, returns nil. If the collection contains only one ite
        (.invoke quot)))) .
 
 : doseq [coll quot -- ...] each .
+
+: dorun [coll -- nil] (ap dorun) .
+
+: doall [lazy-seq -- coll] (ap doall) .
+
+: dotimes "Call the quotation n times"
+  [n quot --]
+  (let [[quot n] (pop-n 2)]
+    (dotimes [_ n]
+      (.invoke quot))) .
 
 : repeat [x -- coll] (ap repeat) .
 
@@ -1283,6 +1387,14 @@ If the collection is empty, returns nil. If the collection contains only one ite
   (ap range) .
 
 : distinct [coll -- coll] (ap distinct) .
+
+: distinct? [x y -- ?] (ap 2 distinct?) .
+
+: distinct2? [x y z -- ?] (ap 3 distinct?) .
+
+: distinct3? [w x y z -- ?] (ap 4 distinct?) .
+
+: distinct?* [coll -- ?] (apply distinct? (pop-it)) .
 
 : cycle [coll] (ap cycle) .
 
@@ -1358,6 +1470,13 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [str patt -- match]
   (ap 2 re-find) .
 
+;; TODO Regular expressions
+;; : re-groups [] .
+
+;; : re-matcher [] .
+
+;; : re-matches [] .
+
 : with-out-str "Invokes the given quotation, binding *out* to a fresh StringWriter and puting its String value on TOS."
   [quot -- s]
   (with-out-str (.invoke (pop-it))) .
@@ -1410,6 +1529,28 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : prefers [multifn -- m] (ap prefers) .
 
+: make-hierarchy [-- hierarchy] (make-hierarchy) .
+
+: derive-global [tag parent --] (pop-n-swap derive) .
+
+: derive [tag parent hierarchy --]
+  (let [[hierarchy parent tag] (pop-n 3)]
+    (derive hierarchy tag parent)) .
+
+: descendants-global [tag -- desc] (ap descendants) .
+
+: descendants [tag hierarchy -- desc] (ap 2 descendants) .
+
+: parents-global [tag -- parents] (ap parents) .
+
+: parents [tag hierarchy -- parents] (ap 2 parents) .
+
+: isa?-global [child parent -- ?] (pop-n-swap isa?) .
+
+: isa? [child parent hierarchy -- ?]
+  (let [[hierarchy parent child] (pop-n 3)]
+    (isa? hierarchy child parent)) .
+
 ;; ### Core IO ###
 
 : slurp [f -- s] (ap slurp) .
@@ -1431,3 +1572,21 @@ If the collection is empty, returns nil. If the collection contains only one ite
   ;; "Howdy!"
 
   )
+
+;; Concurrency
+
+: future [quot -- future] (ap future-call) .
+
+: future-cancel [future -- future] (ap future-cancel) .
+
+: future-cancelled? [future -- ?] (ap future-cancelled?) .
+
+: future-done? [future -- ?] (ap future-done?) .
+
+: future? [x -- ?] (ap future?) .
+
+: promise [-- promise] (promise) .
+
+: deliver [value promise --] (ap 2 deliver) .
+
+: realized? [x -- ?] (ap realized?) .
