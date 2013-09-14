@@ -563,12 +563,9 @@ static class DefExpr implements Expr{
 
         /**
          * Create a def and delegate to DefExpr
-         *
-         * TODO Skip past 'defword' at the beginning of this method.
          */
 	static class Parser implements IParser{
             public Expr parse(C context, Object form) {
-                // System.out.println("PARSE WORD DEF: " + form);
                 if(!(RT.second(form) instanceof Symbol))
                     Util.runtimeException("First argument in word definition must be a Symbol");
                 if(RT.count(form) < 4)
@@ -582,7 +579,6 @@ static class DefExpr implements Expr{
                 String docString = null;
                 // Optional docstring and/or metadata
                 if (RT.third(form) instanceof String) {
-                    // System.out.println("DOCSTRING");
                     if (RT.nth(form, 3) instanceof IPersistentMap) {
                         // Optional metadata on top of optional docstring
                         meta = meta.assoc(RT.DOC_KEY, RT.third(form));
@@ -604,28 +600,19 @@ static class DefExpr implements Expr{
                     }
                     form = RT.next(RT.next(RT.next(form)));
                 } else {
-                    // System.out.println("NO DOCSTRING");
                     form = RT.next(RT.next(form));
                 }
-                // System.out.println("FORM IS NOW: " + form);
                 // First item of form is now stack effect, followed by
                 // word definition forms.
                 IPersistentCollection stackEffect = (IPersistentCollection) RT.first(form);
-                // System.out.println("STACK EFFECT: " + stackEffect);
                 meta = meta.assoc(stackEffectKey, RT.list(QUOTE, stackEffect));
-                // System.out.println("WORD META: " + meta);
                 Symbol sym = (Symbol) gershwinSym.withMeta(meta);
-                // System.out.println("FINAL SYMBOL: " + sym);
-                // System.out.println("WORD DEF:" + sym + ", " + form);
                 // First form is stack effect.
                 IPersistentCollection wrappedForms = wrapGershwinForms(RT.next(form));
-                // System.out.println("WRAPPED FORMS: " + wrappedForms);
                 // Note this is fn*
                 ISeq fnForm = RT.cons(FN,
                                       RT.cons(PersistentVector.EMPTY, wrappedForms));
-                // System.out.println("FN FORM: " + fnForm);
                 IParser defParser = new DefExpr.Parser();
-                // System.out.println("DEF PARSER: " + defParser.getClass().getName());
                 return defParser.parse(context,
                                        RT.cons(DEF,
                                                RT.cons(sym, RT.list(fnForm))));
@@ -673,14 +660,9 @@ static class DefExpr implements Expr{
         public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {}
 
         static Expr parse(C context, ISeq form, String name) {
-            // System.out.println("COMPILER, Parse Quotation: " + form);
-            // First item is QUOTATION op.
             IPersistentCollection wrappedForms = wrapGershwinForms(RT.next(form));
-            // System.out.println("WRAPPED Quotation FORMS: " + wrappedForms);
-            // Note this is fn*
             ISeq fnForm = RT.cons(FN,
                                   RT.cons(PersistentVector.EMPTY, wrappedForms));
-            // System.out.println("FN Quotation FORM: " + fnForm);
             return FnExpr.parse(context, fnForm, name);
         }
     }
@@ -704,14 +686,11 @@ static class DefExpr implements Expr{
         IPersistentCollection wrappedForms = PersistentVector.EMPTY;
         for(ISeq s = (ISeq) form; s != null; s = s.next()) {
             Object o = s.first();
-            // System.out.println("Raw form to wrap: " + o);
             boolean handled = false;
             if(o instanceof Symbol) {
-                // System.out.println("MUNGE WORD SYMBOL: " + o);
                 Namespace currentNs = (Namespace) RT.CURRENT_NS.deref();
                 Symbol cljSym = (Symbol) o;
                 Symbol gwnSym = Symbol.intern(cljSym.toString() + RT.GERSHWIN_SUFFIX);
-                // System.out.println("Maybe it's this Gershwin word.... ? " + gwnSym);
                 Object maybeGwnVar = maybeResolveIn(currentNs, gwnSym);
                 Object maybeCljVar = maybeResolveIn(currentNs, cljSym);
                 if(resolvesToWord(maybeGwnVar)) {
@@ -726,7 +705,6 @@ static class DefExpr implements Expr{
             if(!handled)
                 wrappedForms = RT.conj(wrappedForms, withConjIt(o));
         }
-        // System.out.println("FINAL WRAPPED: " + wrappedForms);
         return wrappedForms;
     }
 

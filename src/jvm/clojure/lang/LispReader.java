@@ -85,7 +85,6 @@ static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
-        // macros['|'] = new CommentReader();
 	macros['\''] = new WrappingReader(QUOTE);
 	macros['@'] = new WrappingReader(DEREF);//new DerefReader();
 	macros['^'] = new MetaReader();
