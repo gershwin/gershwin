@@ -267,6 +267,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : ns-unalias [alias ns --] (ap 2 ns-unalias) .
 
+: var? [x -- ?] (ap var?) .
+
 : pr "Print TOS in a way that can be re-read by Clojure." [n --] (stack-void (ap pr)) .
 
 : newline [] (stack-void (newline)) .
@@ -326,6 +328,10 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : class? [x -- ?] (ap class?) .
 
+: instance? [obj klass -- ?] (ap 2 instance?) .
+
+: supers [klass -- supers] (ap supers) .
+
 : with-meta
   [meta obj -- obj]
   (ap 2 with-meta) .
@@ -371,6 +377,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : fn? [x -- ?] function? .
 
 : ifn? [x -- ?] (ap ifn?) .
+
+;;
+: special-symbol? "Note that this includes 'defword' and 'quotation' from Gershwin's extensions to the Clojure compiler."
+  [x -- ?]
+  (ap special-symbol?) .
 
 : num "Coerce to number" [x -- n] (ap num) .
 
@@ -550,6 +561,12 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 : when-not
   [? then -- ...]
   #[ ] if-not .
+
+: while
+  [pred action --]
+  (let [[action pred] (pop-n 2)]
+    (while (.invoke pred)
+      (.invoke action))) .
 
 : ? "Choose between t or f depending on truthiness of ?"
   [? t f]
@@ -953,9 +970,16 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : seq [coll -- seq] (ap seq) .
 
+: sequence [coll -- coll] (ap sequence) .
+
+: sequential? [x -- ?] (ap sequential?) .
+
 : reverse [coll -- coll] (ap reverse) .
 
-: instance? [obj klass -- ?] (ap 2 instance?) .
+: reversible? [x -- ?] (ap reversible?) .
+
+: satisfies? "Returns true if x satisfied the given protocol"
+  [x protocol] (ap 2 satisfies?) .
 
 : seq? [obj -- ?] (ap seq?) .
 
@@ -1050,7 +1074,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : sorted-map-by* [vks comparator -- m] (apply sorted-map-by (pop-it) (pop-it)) .
 
+: zipmap [vals keys -- zm] (ap 2 zipmap) .
+
 : set [coll -- set] (ap set) .
+
+: set? [x -- ?] (ap set?) .
 
 : sorted-set [a -- set] (ap sorted-set) .
 
@@ -1082,11 +1110,19 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : list*4 [x y z coll -- l] (pop-n-swap3 list*) .
 
+: seque [seq -- seque] (ap seque) .
+
+: seque-of [seq buffer-size-or-queue] (ap 2 seque) .
+
 : into [from to -- coll] (ap 2 into) .
 
 : file-seq [dir -- seq] (ap file-seq) .
 
 : iterator-seq [iter -- seq] (ap iterator-seq) .
+
+: resultset-seq [rs -- seq] (ap resultset-seq) .
+
+: xml-seq [root -- seq] (ap xml-seq) .
 
 : bean [x -- jb] (ap bean) .
 
@@ -1164,6 +1200,8 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : sort [coll -- coll] (ap sort) .
 
+: sorted? [coll -- ?] (ap sorted?) .
+
 : nth [n coll -- x] (ap 2 nth) .
 
 : count [coll -- n] (ap count) .
@@ -1212,15 +1250,45 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 
 : map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
   [coll quot -- coll]
-  (let [[quot coll] (pop-n 2)]
-    (lazy-seq
-     (loop [coll coll final []]
-       (if (seq coll)
-         (do
-           (conj-it (first coll))
-           (.invoke quot)
-           (recur (rest coll) (conj final (pop-it))))
-         final)))) .
+  (let [[quot coll] (pop-n 2)
+        map-fn (fn [item]
+                 (conj-it item)
+                 (.invoke quot)
+                 (pop-it))]
+    (map map-fn coll)) .
+
+: map2 "Two collections"
+  [coll2 coll1 quot -- coll]
+  (let [[quot coll1 coll2] (pop-n 3)
+        map-fn (fn [item1 item2]
+                 (conj-it item2)
+                 (conj-it item1)
+                 (.invoke quot)
+                 (pop-it))]
+    (map map-fn coll1 coll2)) .
+
+: map3 "Three collections"
+  [coll3 coll2 coll1 quot -- coll]
+  (let [[quot coll1 coll2 coll3] (pop-n 4)
+        map-fn (fn [item1 item2 item3]
+                 (conj-it item3)
+                 (conj-it item2)
+                 (conj-it item1)
+                 (.invoke quot)
+                 (pop-it))]
+    (map map-fn coll1 coll2 coll3)) .
+
+: map4 "Four collections"
+  [coll4 coll3 coll2 coll1 quot -- coll]
+  (let [[quot coll1 coll2 coll3 coll4] (pop-n 5)
+        map-fn (fn [item1 item2 item3 item4]
+                 (conj-it item4)
+                 (conj-it item3)
+                 (conj-it item2)
+                 (conj-it item1)
+                 (.invoke quot)
+                 (pop-it))]
+    (map map-fn coll1 coll2 coll3 coll4)) .
 
 : pmap "Invoke the quotation for each element in the collection in parallel, putting th nw collection of these results on TOS."
   [coll quot -- coll]
@@ -1281,51 +1349,80 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : filter "Replace the collection with one including only those items that return truthy for the given predicate quotation."
   [coll pred-quot -- coll]
-  (let [[quot coll] (pop-n 2)]
-    (lazy-seq
-     (loop [coll coll final []]
-       (if (seq coll)
-         (do
-           (conj-it (first coll))
-           (.invoke quot)
-           (if (pop-it)
-             (recur (rest coll) (conj final (first coll)))
-             (recur (rest coll) final)))
-         final)))) .
+  (let [[quot coll] (pop-n 2)
+        filter-fn (fn [item]
+                    (conj-it item)
+                    (.invoke quot)
+                    (pop-it))]
+    (filter filter-fn coll)) .
 
 : remove "Opposite of filter. Replace collection with one including only those items that return falsey for the given predicate."
   [coll pred-quot -- coll]
-  (let [[quot coll] (pop-n 2)]
-    (lazy-seq
-     (loop [coll coll final []]
-       (if (seq coll)
-         (do
-           (conj-it (first coll))
-           (.invoke quot)
-           (if-not (pop-it)
-             (recur (rest coll) (conj final (first coll)))
-             (recur (rest coll) final)))
-         final)))) .
+  (let [[quot coll] (pop-n 2)
+        remove-fn (fn [item]
+                    (conj-it item)
+                    (.invoke quot)
+                    (pop-it))]
+    (remove remove-fn coll)) .
 
 : mapcat
   [coll quot]
   (let [[quot coll] (pop-n 2)
-        mapped (lazy-seq
-                (loop [coll coll final []]
-                  (if (seq coll)
-                    (do
-                      (conj-it (first coll))
-                      (.invoke quot)
-                      (recur (rest coll) (conj final (pop-it))))
-                    final)))]
-    (apply concat mapped)) .
+        map-fn (fn [item]
+                 (conj-it item)
+                 (.invoke quot)
+                 (pop-it))]
+    (mapcat map-fn coll)) .
+
+: mapcat2 "Two collections"
+  [coll2 coll1 quot -- coll]
+  (let [[quot coll1 coll2] (pop-n 3)
+        mapcat-fn (fn [item1 item2]
+                    (conj-it item2)
+                    (conj-it item1)
+                    (.invoke quot)
+                    (pop-it))]
+    (mapcat mapcat-fn coll1 coll2)) .
+
+: mapcat3 "Three collections"
+  [coll3 coll2 coll1 quot -- coll]
+  (let [[quot coll1 coll2 coll3] (pop-n 4)
+        mapcat-fn (fn [item1 item2 item3]
+                    (conj-it item3)
+                    (conj-it item2)
+                    (conj-it item1)
+                    (.invoke quot)
+                    (pop-it))]
+    (mapcat mapcat-fn coll1 coll2 coll3)) .
+
+: mapcat4 "Four collections"
+  [coll4 coll3 coll2 coll1 quot -- coll]
+  (let [[quot coll1 coll2 coll3 coll4] (pop-n 5)
+        mapcat-fn (fn [item1 item2 item3 item4]
+                    (conj-it item4)
+                    (conj-it item3)
+                    (conj-it item2)
+                    (conj-it item1)
+                    (.invoke quot)
+                    (pop-it))]
+    (mapcat mapcat-fn coll1 coll2 coll3 coll4)) .
 
 ;; TODO cover all arities of parition, partition-all
 : partition [coll n -- coll] (ap 2 partition) .
 
+: split-at [coll n -- coll] (ap 2 split-at) .
+
+: replace "Replacement pairs is an associative structure of keys to values that should replace occurrences of those keys in the target collection. E.g. [1 2] {1 :one, 2 :two} replace => [:one :two]"
+  [target replacement-pairs -- target]
+  (ap 2 replace) .
+
 : take "Put a lazy collection on TOS that consists of the first n items from the original collection."
   [coll n -- coll]
   (ap 2 take) .
+
+: take-last [coll n -- coll] (ap 2 take-last) .
+
+: take-nth [coll n -- coll] (ap 2 take-nth) .
 
 : drop-last "Return all but last item in coll, put on TOS."
   [coll -- coll]
@@ -1363,10 +1460,14 @@ If the collection is empty, returns nil. If the collection contains only one ite
 : doall [lazy-seq -- coll] (ap doall) .
 
 : dotimes "Call the quotation n times"
-  [n quot --]
-  (let [[quot n] (pop-n 2)]
+  [quot n --]
+  (let [[n quot] (pop-n 2)]
     (dotimes [_ n]
       (.invoke quot))) .
+
+: time "Prints time took, returns value"
+  [quot -- value]
+  (time (.invoke (pop-it))) drop . ;; drop print's nil
 
 : repeat [x -- coll] (ap repeat) .
 
@@ -1397,6 +1498,8 @@ If the collection is empty, returns nil. If the collection contains only one ite
 : distinct?* [coll -- ?] (apply distinct? (pop-it)) .
 
 : cycle [coll] (ap cycle) .
+
+: shuffle [coll] (ap shuffle) .
 
 : interleave [coll1 coll2 -- coll] (pop-n-swap interleave) .
 
@@ -1443,10 +1546,14 @@ If the collection is empty, returns nil. If the collection contains only one ite
   (let [[s end start] (pop-n 3)]
     (subs s start end)) .
 
+: subs [start end s -- s] substring .
+
 : substring-from
   [start s -- s]
   (let [[s start] (pop-n 2)]
     (subs s start)).
+
+: subs-from [start s -- s] substring-from .
 
 : starts-with? [substring s -- ?] (.startsWith (pop-it) (pop-it)) .
 
@@ -1470,12 +1577,16 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [str patt -- match]
   (ap 2 re-find) .
 
+: re-find-matcher
+  [m -- match]
+  (ap re-find) .
+
 ;; TODO Regular expressions
-;; : re-groups [] .
+: re-groups [match -- groups] (ap re-groups) .
 
-;; : re-matcher [] .
+: re-matcher [s re -- matcher] (ap 2 re-matcher) .
 
-;; : re-matches [] .
+: re-matches [s re -- groups] (ap 2 re-matches) .
 
 : with-out-str "Invokes the given quotation, binding *out* to a fresh StringWriter and puting its String value on TOS."
   [quot -- s]
@@ -1537,6 +1648,12 @@ If the collection is empty, returns nil. If the collection contains only one ite
   (let [[hierarchy parent tag] (pop-n 3)]
     (derive hierarchy tag parent)) .
 
+: underive-global [tag parent --] (pop-n-swap underive) .
+
+: underive [tag parent hierarchy --]
+  (let [[hierarchy parent tag] (pop-n 3)]
+    (underive hierarchy tag parent)) .
+
 : descendants-global [tag -- desc] (ap descendants) .
 
 : descendants [tag hierarchy -- desc] (ap 2 descendants) .
@@ -1574,6 +1691,54 @@ If the collection is empty, returns nil. If the collection contains only one ite
   )
 
 ;; Concurrency
+
+: atom [x -- atom] (ap atom) .
+
+: swap! [quot atom -- value]
+  (let [[atom quot] (pop-n 2)
+        swap-fn (fn [old-val]
+                  (conj-it old-val)
+                  (.invoke quot)
+                  (pop-it))]
+    (swap! atom swap-fn)) .
+
+: reset! [value atom -- value] (ap 2 reset!) .
+
+: agent [x -- agent] (ap agent) .
+
+: send [quot agent -- agent]
+  (let [[agent quot] (pop-n 2)
+        agent-fn (fn [agent-state]
+                   (conj-it agent-state)
+                   (.invoke quot)
+                   (pop-it))]
+    (send agent agent-fn)) .
+
+: send-off [quot agent -- agent]
+  (let [[agent quot] (pop-n 2)
+        agent-fn (fn [agent-state]
+                   (conj-it agent-state)
+                   (.invoke quot)
+                   (pop-it))]
+    (send-off agent agent-fn)) .
+
+: await [a --] (stack-void (ap await)) .
+
+: await2 [a1 a2 -- ]  (stack-void (ap 2 await)) .
+
+: await3 [a1 a2 a3 -- ]  (stack-void (ap 3 await)) .
+
+: await4 [a1 a2 a3 a4 -- ]  (stack-void (ap 4 await)) .
+
+: add-watch [quot key ref --]
+  (let [[ref key quot] (pop-n 3)
+        watch-fn (fn [k r o n]
+                   (conj-it n)
+                   (conj-it o)
+                   (conj-it r)
+                   (conj-it k)
+                   (.invoke quot))]
+    (add-watch ref key watch-fn)) .
 
 : future [quot -- future] (ap future-call) .
 
