@@ -43,6 +43,14 @@
     <url>git@github.com:gershwin/gershwin.git</url>
   </scm>
 
+  <distributionManagement>
+    <repository>
+      <id>clojars</id>
+      <name>Clojars repository</name>
+      <url>https://clojars.org/repo</url>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.jsr166-mirror</groupId>
