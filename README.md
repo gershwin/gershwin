@@ -6,7 +6,17 @@ Gershwin is a stack-based, concatenative programming language with a Clojure run
 
 As an extension to Clojure, all legal Clojure code is legal Gershwin code. Gershwin changes to the Clojure reader, compiler, and public API are primarily additive and, as such, should not create compatibility conflicts with existing Clojure code bases. Please report any incompatibilities as bugs. The language versions of Gershwin and Clojure are both tracked in the Maven `pom.xml` file and available programmatically via the `gershwin-version` and `clojure-version` functions respectively.
 
---------------------------------------------------------------------------
+## Open Source Tools ##
+
+I would like to thank the following companies for providing their tools free of charge to Gershwin developers as part of their contribution to the Open Source community.
+
+### JetBrains: Intellij IDEA ###
+
+When I need to do Java, Scala, or JRuby development, I rely on Intellij IDEA's excellent support for JVM languages. I would like to thank JetBrains for granting Gershwin developers a free license to Intellij IDEA Ultimate.
+
+<a href="http://www.jetbrains.com/idea/features/javascript.html" style="display:block; background:#0d3a9e url(http://www.jetbrains.com/idea/opensource/img/all/banners/idea468x60_blue.gif) no-repeat 10px 50%; border:solid 1px #0d3a9e; margin:0;padding:0;text-decoration:none;text-indent:0;letter-spacing:-0.001em; width:466px; height:58px" alt="Java IDE with advanced HTML/CSS/JS editor for hardcore web-developers" title="Intellij IDEA: Java IDE with advanced HTML/CSS/JS editor for hardcore web-developers"><span style="margin:0 0 0 205px;padding:18px 0 2px 0; line-height:13px;font-size:11px;cursor:pointer;  background-image:none;border:0;display:block; width:255px; color: #acc4f9; font-family: trebuchet ms,arial,sans-serif;font-weight: normal;text-align:left;">Intellij IDEA: Java IDE with advanced HTML/CSS/JS editor for hardcore web-developers</span></a>
+
+## Licenses ##
 
 This program uses the ASM bytecode engineering library which is distributed
 with the following notice:
